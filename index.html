@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team 5171 | Start Guide</title>
+    <meta name="description" content="Technical documentation and start guide for Team 5171.">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Config & Styles -->
+    <script src="config.js"></script>
+    <link rel="stylesheet" href="css/theme.css">
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- Markdown Parser -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+
+</head>
+
+<body>
+    <nav id="sidebar">
+        <div class="nav-header">
+            <div class="logo-circle" id="sidebar-logo"></div>
+            <h1 id="sidebar-title"></h1>
+        </div>
+        <div class="nav-group-title">Documentation</div>
+        <div id="page-list">
+            <div class="nav-link">Loading files...</div>
+        </div>
+        <div class="nav-group-title">Actions</div>
+        <div class="nav-link" onclick="sharePage()">
+            <img src="svg/share.svg" width="16" height="16" style="opacity: 0.8;"> Share Page
+        </div>
+        <div class="nav-link" onclick="editPage()">
+            <img src="svg/edit.svg" width="16" height="16" style="opacity: 0.8;"> Edit in GitHub
+        </div>
+        <div class="nav-link" onclick="addPageModal()">
+            <img src="svg/add.svg" width="16" height="16" style="opacity: 0.8;"> Add New Page
+        </div>
+        <div class="nav-footer" id="sidebar-footer">
+
+        </div>
+    </nav>
+
+    <main>
+        <div id="content">
+            <div style="text-align: center; padding-top: 100px;">
+                <div class="logo-circle" id="welcome-logo" style="width: 60px; height: 60px; margin: 0 auto 24px;">
+                </div>
+                <h1 style="font-family: 'Outfit';" id="welcome-title"></h1>
+                <p style="color: var(--text-dim); font-size: 1.1rem; max-width: 500px; margin: 0 auto;"
+                    id="welcome-text">
+                </p>
+            </div>
+        </div>
+    </main>
+
+    <aside>
+        <div class="aside-section">
+            <h2><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
+                    <path
+                        d="M1 2.75A.75.75 0 011.75 2h12.5a.75.75 0 110 1.5H1.75A.75.75 0 011 2.75zm0 5A.75.75 0 011.75 7h12.5a.75.75 0 110 1.5H1.75A.75.75 0 011 7.75zM1.75 12a.75.75 0 100 1.5h12.5a.75.75 0 100-1.5H1.75z">
+                    </path>
+                </svg> Table of Contents</h2>
+            <div id="toc"></div>
+        </div>
+        <div class="aside-section">
+            <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
+                <h2 style="margin: 0;"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
+                        <path
+                            d="M10.896 2H4.95A1.75 1.75 0 003.2 3.75v9.5c0 .966.784 1.75 1.75 1.75h6.926a1.75 1.75 0 001.75-1.75V3.75A1.75 1.75 0 0011.875 2h-.979zM5 3.5h5.875a.25.25 0 01.25.25v1.5a.25.25 0 01-.25.25H5a.25.25 0 01-.25-.25v-1.5A.25.25 0 015 3.5z">
+                        </path>
+                    </svg> Updates</h2>
+                <div style="display: flex; gap: 8px;">
+                    <!-- Simple Activity Feed (Dynamic) -->
+                </div>
+            </div>
+            <div id="activity-feed"></div>
+        </div>
+    </aside>
+
+    <div id="modal-overlay" class="modal-overlay">
+        <div class="modal">
+            <h3 id="modal-title">Add New Page</h3>
+            <input type="text" id="page-name" placeholder="Page name (e.g. Getting Started)">
+            <textarea id="page-content" placeholder="Page content (Markdown supported)"></textarea>
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="submitAddPage()">Create on GitHub</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast">Link copied to clipboard!</div>
+
+    <script>
+        const state = {
+            currentPath: 'README.md' // Fallback
+        };
+
+        const ENDPOINTS = {
+            contents: `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents?ref=${CONFIG.branch}`,
+            commits: `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/commits?sha=${CONFIG.branch}&per_page=5`,
+            raw: (path) => `https://raw.githubusercontent.com/${CONFIG.owner}/${CONFIG.repo}/${CONFIG.branch}/${path}`
+        };
+
+        // Initialize UI from CONFIG
+        function applyBranding() {
+            document.title = CONFIG.branding.title || CONFIG.branding.shortTitle;
+            document.querySelector('meta[name="description"]').content = CONFIG.branding.description;
+
+            document.getElementById('sidebar-title').textContent = CONFIG.branding.shortTitle;
+
+            // Logos
+            const setLogo = (elId, size) => {
+                const el = document.getElementById(elId);
+                if (el) {
+                    el.style.backgroundImage = `url('${CONFIG.branding.logo}')`;
+                }
+            };
+            setLogo('sidebar-logo');
+            setLogo('welcome-logo');
+
+            // Welcome Text
+            document.getElementById('welcome-title').textContent = CONFIG.branding.welcomeTitle;
+            document.getElementById('welcome-text').textContent = CONFIG.branding.welcomeText;
+
+            // Footer
+            document.getElementById('sidebar-footer').innerHTML = `
+                Created by <strong>${CONFIG.footer.creator}</strong> with <strong>${CONFIG.footer.organization}</strong><br>
+                ${CONFIG.footer.version}
+            `;
+
+            // Activity Options (None needed for simple feed)
+        }
+
+        async function init() {
+            applyBranding();
+            try {
+                await Promise.all([loadFileList(), refreshActivity()]);
+            } catch (err) {
+                console.error("Initialization failed:", err);
+            }
+        }
+
+        async function loadFileList() {
+            const container = document.getElementById('page-list');
+            try {
+                const res = await fetch(ENDPOINTS.contents);
+                if (!res.ok) throw new Error("Repo not found");
+                const items = await res.json();
+                const files = items.filter(i => i.name.endsWith('.md'));
+
+                if (files.length === 0) {
+                    container.innerHTML = `<div style="padding: 24px; color: var(--text-dim);">No guides found yet.</div>`;
+                    return;
+                }
+
+                container.innerHTML = files.map(file => {
+                    const urlName = file.path.replace('.md', '');
+                    const href = urlName.toLowerCase() === 'readme' ? './' : `?page=${urlName}`;
+                    return `
+                        <a class="nav-link" href="${href}" data-path="${file.path}" onclick="event.preventDefault(); loadFile('${file.path}', this)">
+                            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" style="opacity: 0.6"><path d="M3.75 2h3.5l3.5 3.5v8.75A1.75 1.75 0 019 16H3.75A1.75 1.75 0 012 14.25V3.75C2 2.784 2.784 2 3.75 2z"></path></svg>
+                            ${file.name.replace('.md', '')}
+                        </a>
+                    `;
+                }).join('');
+
+                // Load default if exists
+                const params = new URLSearchParams(window.location.search);
+                const requested = params.get('page') || params.get('') || window.location.search.substring(1);
+
+                // Prioritize finding the file
+                const target = files.find(f => f.name.toLowerCase() === (requested + ".md").toLowerCase())
+                    || files.find(f => f.path.toLowerCase() === (requested + ".md").toLowerCase())
+                    || files.find(f => f.name === 'README.md')
+                    || files[0];
+
+                if (target) {
+                    const el = document.querySelector(`[data-path="${target.path}"]`);
+                    loadFile(target.path, el);
+                }
+
+            } catch (err) {
+                container.innerHTML = `<div style="padding: 24px; font-size: 0.8rem; color: #ff7b72;">
+                    Failed to connect to GitHub.<br>
+                    Verify <strong>${CONFIG.owner}/${CONFIG.repo}</strong> is public.
+                </div>`;
+            }
+        }
+
+        async function loadFile(path, element) {
+            state.currentPath = path;
+            const content = document.getElementById('content');
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            if (element) {
+                element.classList.add('active');
+            } else {
+                // Try to find the element if we loaded via URL
+                const target = document.querySelector(`[data-path="${path}"]`);
+                if (target) target.classList.add('active');
+            }
+
+            try {
+                content.innerHTML = `<div style="text-align: center; padding: 100px;">Loading content...</div>`;
+                content.style.opacity = '0';
+                content.style.transform = 'translateY(10px)';
+
+                const res = await fetch(ENDPOINTS.raw(path));
+                const text = await res.text();
+
+                content.innerHTML = marked.parse(text);
+                content.style.opacity = '1';
+                content.style.transform = 'translateY(0)';
+
+                // Fix relative asset paths (images, videos, audio, sources)
+                const currentDir = path.includes('/') ? path.substring(0, path.lastIndexOf('/') + 1) : '';
+                content.querySelectorAll('img, video, audio, source').forEach(el => {
+                    ['src', 'poster'].forEach(attr => {
+                        const val = el.getAttribute(attr);
+                        if (val && !val.startsWith('http') && !val.startsWith('/') && !val.startsWith('data:')) {
+                            const fullPath = currentDir + val;
+                            el.setAttribute(attr, ENDPOINTS.raw(fullPath));
+                        }
+                    });
+                });
+
+                generateTOC(content);
+                content.parentElement.scrollTop = 0;
+
+                // Sync History
+                const urlName = path.replace('.md', '');
+                const cleanBase = window.location.pathname.split('?')[0].split('#')[0];
+                const repoBase = cleanBase.endsWith('/') ? cleanBase : cleanBase.substring(0, cleanBase.lastIndexOf('/') + 1);
+                // Remove index.html if present
+                const finalBase = repoBase.replace(/index\.html\/?$/, '');
+
+                const newQuery = urlName.toLowerCase() === 'readme' ? '' : `?page=${urlName}`;
+                window.history.replaceState({ path }, null, finalBase + newQuery);
+
+                // Handle relative links inside the content
+                content.querySelectorAll('a').forEach(link => {
+                    const href = link.getAttribute('href');
+                    if (href && !href.startsWith('http') && !href.startsWith('#')) {
+                        link.onclick = (e) => {
+                            const isDoc = href.endsWith('.md') || !href.includes('.');
+                            if (!isDoc) return;
+
+                            e.preventDefault();
+                            let targetPath = href;
+
+                            // Resolve relative paths if not absolute-in-repo
+                            if (!href.startsWith('/')) {
+                                const currentDir = path.includes('/') ? path.substring(0, path.lastIndexOf('/') + 1) : '';
+                                targetPath = currentDir + href;
+                            } else {
+                                targetPath = href.substring(1);
+                            }
+
+                            if (!targetPath.endsWith('.md') && !targetPath.includes('.')) targetPath += '.md';
+                            loadFile(targetPath);
+                        };
+                    }
+                });
+            } catch (err) {
+                content.innerHTML = `<h1>Error</h1><p>Failed to load ${path}. Ensure the file exists on the main branch.</p>`;
+            }
+        }
+
+        function refreshActivity() {
+            loadActivity(CONFIG.activityRepo);
+        }
+
+        async function loadActivity(repoName) {
+            const feed = document.getElementById('activity-feed');
+            feed.innerHTML = `<div style="font-size: 0.8rem; padding: 12px 0; color: var(--text-dim);">Loading...</div>`;
+            try {
+                const url = `https://api.github.com/repos/${CONFIG.owner}/${repoName}/commits?per_page=5`;
+                const res = await fetch(url);
+                if (!res.ok) throw new Error("Commits not found");
+                const commits = await res.json();
+                feed.innerHTML = commits.map(c => `
+                    <div class="activity-item">
+                        <div class="activity-author">${c.commit.author.name}</div>
+                        <div class="activity-msg">${c.commit.message.split('\n')[0]}</div>
+                        <div class="activity-date">${new Date(c.commit.author.date).toLocaleDateString()}</div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                feed.innerHTML = `<p style="font-size: 0.8rem; color: #ff7b72;">No updates found for ${repoName}.</p>`;
+            }
+        }
+
+        function generateTOC(container) {
+            const toc = document.getElementById('toc');
+            const headings = container.querySelectorAll('h1, h2, h3');
+            toc.innerHTML = '';
+
+            if (headings.length === 0) {
+                toc.innerHTML = '<p style="color: var(--text-dim); font-size: 0.8rem;">No headings found.</p>';
+                return;
+            }
+
+            headings.forEach((h, i) => {
+                const id = `heading-${i}`;
+                h.id = id;
+                const a = document.createElement('a');
+                a.href = `#${id}`;
+                a.className = `toc-link toc-${h.tagName.toLowerCase()}`;
+                a.textContent = h.textContent;
+                toc.appendChild(a);
+            });
+        }
+
+        // Mobile Sidebar Toggle
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+
+        // Actions
+        async function sharePage() {
+            const url = window.location.href;
+
+            // Try the modern Share API first
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: document.title,
+                        text: `Check out this guide: ${document.title}`,
+                        url: url
+                    });
+                    return; // Shared successfully
+                } catch (err) {
+                    if (err.name === 'AbortError') return;
+                    console.warn("Share API failed, falling back to clipboard:", err);
+                }
+            }
+
+            // Try Clipboard API
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                try {
+                    await navigator.clipboard.writeText(url);
+                    showToast("Link copied to clipboard!");
+                    return;
+                } catch (err) {
+                    console.warn("Clipboard API failed, falling back to legacy copy:", err);
+                }
+            }
+
+            // Legacy Fallback (for non-HTTPS or older browsers)
+            try {
+                const textArea = document.createElement("textarea");
+                textArea.value = url;
+                textArea.style.position = "fixed";
+                textArea.style.left = "-9999px";
+                textArea.style.top = "0";
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                const successful = document.execCommand('copy');
+                document.body.removeChild(textArea);
+                if (successful) {
+                    showToast("Link copied to clipboard!");
+                } else {
+                    throw new Error("execCommand('copy') was unsuccessful");
+                }
+            } catch (err) {
+                console.error("All copy methods failed:", err);
+                alert("Failed to copy link. Please copy the URL manually from the address bar.");
+            }
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.style.display = 'block';
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => {
+                    toast.style.display = 'none';
+                    toast.style.opacity = '1';
+                }, 300);
+            }, 3000);
+        }
+
+        function editPage() {
+            const url = `https://github.com/${CONFIG.owner}/${CONFIG.repo}/edit/${CONFIG.branch}/${state.currentPath}`;
+            window.open(url, '_blank');
+        }
+
+        function addPageModal() {
+            document.getElementById('modal-overlay').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('modal-overlay').style.display = 'none';
+        }
+
+        function submitAddPage() {
+            const name = document.getElementById('page-name').value.trim();
+            const contents = document.getElementById('page-content').value;
+
+            if (!name) {
+                alert("Please enter a page name.");
+                return;
+            }
+
+            const url = `https://github.com/${CONFIG.owner}/${CONFIG.repo}/new/${CONFIG.branch}?filename=${encodeURIComponent(name)}.md&value=${encodeURIComponent(contents)}`;
+            window.open(url, '_blank');
+            closeModal();
+        }
+
+        init();
+    </script>
+</body>
+
+</html>
