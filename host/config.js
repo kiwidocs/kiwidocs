@@ -16,30 +16,30 @@
 */
 const CONFIG = {
     // Your GitHub Organization or Username
-    owner: "team5171",
+    owner: "kiwidocs",
 
     // The Repository Name (Source for Docs)
-    repo: "2026docs",
+    repo: "kiwidocs",
 
     // The Repository for the Activity Feed (can be the same or different)
-    activityRepo: "2026docs",
+    activityRepo: "kiwidocs",
 
     // Default Branch (main/master)
     branch: "main",
 
     // Branding
     branding: {
-        title: "Team 5171 | Start Guide", // Window title
-        shortTitle: "Start Guide",         // Sidebar title
-        logo: "https://github.com/team5171.png",
-        welcomeTitle: "Welcome to Team 5171",
+        title: "Kiwi Docs", // Window title
+        shortTitle: "Kiwi Docs",         // Sidebar title
+        logo: "https://github.com/kiwidocs.png",
+        welcomeTitle: "Welcome to Kiwi Docs",
         welcomeText: "We are initializing the workspace and fetching the latest guides. Please select a file from the sidebar to begin."
     },
 
     // Footer Info
     footer: {
         creator: "Veer Bajaj",
-        organization: "Team 5171",
+        organization: "Kiwi Docs",
         version: "Kiwi Docs v2.1.0"
     }
 };
