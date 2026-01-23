@@ -55,4 +55,4 @@ or just open `index.html` in your browser (though some API features might need a
 
 ## Credits
 Originally created by **Veer Bajaj** for **Team 5171**.
-Released under MIT License.
+Released under GNU GPL v3 License.
