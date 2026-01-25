@@ -5,60 +5,30 @@ isMultiLine: false
 ---
 <script>
 (args) => {
-  // Parse arguments passed as key="value"
-  // Since our blocklib.js handles parsing arguments into a 'props' object effectively via renderTemplate (if we used it),
-  // but here we are in a raw script. 
-  // Wait, blocklib.js passes 'args' string to renderFn. We need to parse it ourselves or use a helper?
-  // BlockLib has `parseArgs` but it's an instance method. 
-  // We can duplicate the simple regex parser here or rely on the Fact that args is the raw string inside parens.
-  
   const parseArgs = (str) => {
     const res = {};
     if (!str) return res;
-    // Regex to match key="value" handling escaped quotes if needed? generic simple parser
-    const regex = /(\w+)=\"([^\"]*)\"/g;
+    const regex = /([a-zA-Z0-9_-]+)=(?:"((?:[^"\\]|\\.)*)"|'((?:[^'\\]|\\.)*)')/g;
     let match;
     while ((match = regex.exec(str)) !== null) {
-        res[match[1]] = match[2];
+      const key = match[1];
+      const val = match[2] !== undefined ? match[2] : match[3];
+      res[key] = val.replace(/\\(["'])/g, '$1'); 
     }
     return res;
   };
 
   const snippets = parseArgs(args);
   const langs = Object.keys(snippets);
+  if (langs.length === 0) return 'No snippets';
+
+  const id = 'kiwi-' + Math.random().toString(36).substr(2, 5);
+  const escapeHtml = (str) => str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+  const buttons = langs.map((l, i) => `<button style="background: ${i===0?'#30363d':'transparent'}; color: white; border: 1px solid #30363d; padding: 4px 12px; cursor: pointer;" onclick="const p=this.closest('.kiwi-tabs'); p.querySelectorAll('.kiwi-c').forEach(c=>c.style.display='none'); p.querySelector('.kiwi-'+'${l}').style.display='block'; this.parentElement.querySelectorAll('button').forEach(b=>b.style.background='transparent'); this.style.background='#30363d';">${l}</button>`).join('');
   
-  if (langs.length === 0) return `<div style="color:red">No snippets provided. Use python="..." etc.</div>`;
+  const blocks = langs.map((l, i) => `<div class="kiwi-c kiwi-${l}" style="display: ${i===0?'block':'none'}; padding: 12px; background: #0d1117; border: 1px solid #30363d; border-top: 0;"><pre style="margin:0;"><code class="language-${l}">${escapeHtml(snippets[l])}</code></pre></div>`).join('');
 
-  const id = 'kiwi-snip-' + Math.random().toString(36).substr(2, 5);
-  
-  // Helper to escape HTML in the code string (which is already inside quotes in the arg)
-  // Converting the argument value to safe HTML
-  const escapeHtml = (str) => str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-
-  const buttons = langs.map((lang, i) => 
-    `<button class="tab-btn ${i === 0 ? 'active' : ''}" 
-             onclick="const p=this.closest('.snippet-tabs'); p.dataset.active='${lang}'; p.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active')); this.classList.add('active');">${lang}</button>`
-  ).join('');
-
-  return `
-<div id="${id}" class="snippet-tabs" data-active="${langs[0]}">
-  <div class="tab-header">${buttons}</div>
-  <div class="tab-body">
-    ${langs.map(lang => `
-      <div class="tab-content-wrapper" data-lang="${lang}">
-        <pre><code class="language-${lang.toLowerCase()}">${escapeHtml(snippets[lang])}</code></pre>
-      </div>
-    `).join('')}
-  </div>
-  <style>
-    .snippet-tabs { border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; margin: 1rem 0; background: #0d1117; overflow: hidden; }
-    .tab-header { display: flex; background: #161b22; border-bottom: 1px solid rgba(255,255,255,0.1); }
-    .tab-btn { padding: 10px 16px; border: none; background: none; cursor: pointer; color: #8b949e; font-size: 13px; font-weight: 500; border-bottom: 2px solid transparent; }
-    .tab-btn.active { color: #58a6ff; border-bottom-color: #58a6ff; background: rgba(88, 166, 255, 0.05); }
-    .tab-content-wrapper { display: none; padding: 1rem; overflow-x: auto; }
-    ${langs.map(l => `.snippet-tabs[data-active="${l}"] .tab-content-wrapper[data-lang="${l}"] { display: block !important; }`).join('')}
-    pre { margin: 0; font-family: ui-monospace, monospace; font-size: 13px; color: #e6edf3; }
-  </style>
-</div>`.trim();
+  return `<div class="kiwi-tabs" style="margin: 16px 0;"><div>${buttons}</div>${blocks}</div>`;
 }
 </script>

@@ -3,6 +3,4 @@ name: Typing SVG
 trigger: typing
 isMultiLine: false
 ---
-<div style="text-align: center; margin: 2rem 0;">
-  <img src="https://readme-typing-svg.demolab.com?font=Segoe+UI&weight=500&size={size|16}&duration={duration|2500}&pause={pause|800}&color={color|00BCD4}&center=true&vCenter=true&width={width|350}&lines={lines|Welcome+to+Kiwi+Docs;The+smartest+documentation+system;Built+for+AI+and+Humans}" alt="Typing intro">
-</div>
+<div style="text-align: center; margin: 2rem 0;"> <img src="https://readme-typing-svg.demolab.com?font=Segoe+UI&weight=500&size={size|16}&duration={duration|2500}&pause={pause|800}&color={color|00BCD4}&center=true&vCenter=true&width={width|350}&lines={lines|Welcome+to+Kiwi+Docs;The+smartest+documentation+system;Built+for+AI+and+Humans}" alt="Typing intro"> </div>

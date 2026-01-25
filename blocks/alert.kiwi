@@ -3,10 +3,4 @@ name: Alert
 trigger: alert
 isMultiLine: false
 ---
-<div style="padding: 1rem; background: rgba(88, 166, 255, 0.1); border-left: 4px solid var(--accent-primary, #58a6ff); border-radius: 8px; margin: 1.5rem 0; color: white;">
-  <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-weight: 600;">
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 16A8 8 0 118 0a8 8 0 010 16zm.75-12h-1.5v6h1.5V4zm0 8h-1.5v1.5h1.5V12z"></path></svg>
-    {title|Attention}
-  </div>
-  <div style="opacity: 0.9; font-size: 0.95rem;">{body}</div>
-</div>
+<div style="background: {color|#58a6ff}22; border: 1px solid {color|#58a6ff}; border-radius: 8px; padding: 16px; margin: 16px 0; color: white;"> <strong style="color: {color|#58a6ff}; text-transform: uppercase; display: block; margin-bottom: 8px;">{title|Note}</strong> <div>{body|No content}</div> </div>

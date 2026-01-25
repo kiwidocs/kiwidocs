@@ -1,20 +1,3 @@
-/*
-        Copyright (C) 2026 - Kiwi Docs by Veer Bajaj <https://github.com/kiwidocs>
-
-        This program is free software: you can redistribute it and/or modify
-        it under the terms of the GNU General Public License as published by
-        the Free Software Foundation, either version 3 of the License, or
-        (at your option) any later version.
-
-        This program is distributed in the hope that it will be useful,
-        but WITHOUT ANY WARRANTY; without even the implied warranty of
-        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-        GNU General Public License for more details.
-
-        You should have received a copy of the GNU General Public License
-        along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
-
 /**
  * KiwiBlockLib - Handles custom building blocks for Markdown.
  * Supports simple Template blocks and complex Script blocks.
@@ -38,7 +21,7 @@ class KiwiBlockLib {
                 }
             }));
         } catch (e) {
-            console.warn("KiwiBlockLib: Blocks folder or API error", e);
+            console.warn("KiwiBlockLib [v4]: Blocks folder or API error", e);
         }
     }
 
@@ -68,11 +51,10 @@ class KiwiBlockLib {
                     const scriptMatch = bodyText.match(/<script>([\s\S]*?)<\/script>/);
                     if (scriptMatch) {
                         const scriptContent = scriptMatch[1].trim();
-                        // The script should return a function or be an arrow function
                         try {
                             block.renderFn = new Function(`return ${scriptContent}`)();
                         } catch (e) {
-                            console.error(`Error parsing script in ${path}`, e);
+                            console.error(`KiwiBlockLib [v4]: Error parsing script in ${path}`, e);
                         }
                     } else {
                         // Simple template renderer
@@ -82,13 +64,12 @@ class KiwiBlockLib {
             }
 
             if (block.trigger) {
-                // Sanitize trigger name: remove leading @ or /$@ if present to normalize
-                const cleanTrigger = block.trigger.replace(/^[\/@$]+/, '').replace(/@$/, '');
+                const cleanTrigger = block.trigger.replace(/[^\w-]/g, '');
                 this.registry[cleanTrigger] = block;
-                console.log(`KiwiBlockLib: Registered ${cleanTrigger} (Syntax: /$@${cleanTrigger} ... /@$)`);
+                console.log(`KiwiBlockLib [v4]: Registered ${cleanTrigger} (Syntax: <!-- @${cleanTrigger}(...) -->)`);
             }
         } catch (e) {
-            console.error(`KiwiBlockLib: Failed to load block at ${path}`, e);
+            console.error(`KiwiBlockLib [v4]: Failed to load block at ${path}`, e);
         }
     }
 
@@ -106,16 +87,15 @@ class KiwiBlockLib {
         return header;
     }
 
-    renderTemplate(template, args, body) {
+    renderTemplate(template, args, bodyContent) {
         const props = this.parseArgs(args);
         let result = template;
 
-        // Static unique ID for this instance if {id} is used
         const instanceId = 'kiwi-' + Math.random().toString(36).substr(2, 9);
+        const finalBody = props.body || bodyContent || '';
 
-        // Replace {key} or {key|default}
         result = result.replace(/\{(\w+)(?:\|([^}]+))?\}/g, (match, key, def) => {
-            if (key === 'body') return body || '';
+            if (key === 'body') return finalBody;
             if (key === 'id') return instanceId;
             return props[key] || def || '';
         });
@@ -126,52 +106,52 @@ class KiwiBlockLib {
     parseArgs(str) {
         const res = {};
         if (!str) return res;
-        // Match key="value"
-        const regex = /(\w+)=\"([^\"]*)\"/g;
+
+        // Regex matches key="val" or key='val'
+        const regex = /([a-zA-Z0-9_-]+)=(?:"((?:[^"\\]|\\.)*)"|'((?:[^'\\]|\\.)*)')/g;
         let match;
         while ((match = regex.exec(str)) !== null) {
-            res[match[1]] = match[2];
+            const key = match[1];
+            const val = match[2] !== undefined ? match[2] : match[3];
+            res[key] = val.replace(/\\(["'])/g, '$1');
         }
         return res;
     }
 
     process(text) {
         if (!text) return '';
-        let processed = text;
+        console.log(`KiwiBlockLib [v4]: Processing ${text.length} chars`);
 
-        // Syntax: <!-- @trigger(args) -->
-        // We look for HTML comments that start with @Key
-        const regex = /<!--\s*@([a-zA-Z0-9_-]+)(?:\((.*?)\))?\s*-->/gs;
+        let processed = text;
+        let matchCount = 0;
+
+        const regex = /<!--\s*@([a-zA-Z0-9_-]+)(?:\(([\s\S]*?)\))?\s*-->/g;
 
         processed = processed.replace(regex, (match, name, args) => {
+            matchCount++;
             const block = this.registry[name];
 
             if (!block) {
-                // If it's just a normal comment or unknown block, leave it? 
-                // Or maybe the user made a typo.
-                // For now, let's log it but maybe not render an error in place to be less intrusive,
-                // OR render a small warning if it clearly looks like a block attempt.
-                console.warn(`KiwiBlockLib: Unknown block "${name}"`);
-                return match; // Leave comment as is (invisible in rendered HTML usually)
+                console.warn(`KiwiBlockLib [v4]: Unknown block "${name}"`);
+                return `<div style="border: 1px dashed orange; color: orange; padding: 4px; font-size:0.8em;">⚠️ Unknown Block: ${name}</div>`;
             }
 
             try {
-                // Render the block
-                // We don't support multi-line body in this syntax, everything is in args.
-                // We pass empty string as body.
-                const result = block.renderFn(args || '', '');
+                const cleanArgs = args ? args.trim() : '';
+                const result = block.renderFn(cleanArgs, '');
                 let finalHtml = typeof result === 'string' ? result.trim() : result;
 
-                // Surround with newlines to ensure it breaks out of markdown paragraphs if needed
+                // Flatten HTML to prevent Markdown code block detection
+                finalHtml = finalHtml.replace(/\n\s*/g, ' ').replace(/\s+/g, ' ');
+
                 return `\n\n${finalHtml}\n\n`;
             } catch (e) {
-                console.error(`KiwiBlockLib: Error rendering ${name}`, e);
-                return `<div style="border: 1px solid red; color: red; padding: 10px;">
-                    <strong>Block Error (${name})</strong>: ${e.message}
-                </div>`;
+                console.error(`KiwiBlockLib [v4]: Error rendering ${name}`, e);
+                return `<div style="border: 1px solid red; color: red; padding: 10px;">Error: ${e.message}</div>`;
             }
         });
 
+        console.log(`KiwiBlockLib [v4]: Processed ${matchCount} blocks`);
         return processed;
     }
 }
