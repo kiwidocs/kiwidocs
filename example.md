@@ -20,23 +20,30 @@ Always double check your triggers before publishing to production.
 ## 💻 Multi-Language Code Snippets
 The `@snippets-per-type` block is ideal for developers. It creates an interactive, tabbed interface.
 
+### Example:
+
 @snippets-per-type
-@@python:
-def hello_kiwi():
-    print("Welcome to the modern docs!")
-    return True
+python:
+def authenticate_user(token):
+    # Initialize the secure connection
+    print(f"Connecting with: {token}")
+    return {"status": "success", "code": 200}
 
 @@javascript:
-function helloKiwi() {
-  console.log("Welcome to the modern docs!");
-  return true;
+async function authenticateUser(token) {
+    console.log("Connecting with: " + token);
+    const response = await fetch('/api/auth', {
+        method: 'POST',
+        body: JSON.stringify({ token })
+    });
+    return response.json();
 }
 
 @@rust:
-fn main() {
-    println!("Welcome to the modern docs!");
+fn authenticate_user(token: &str) -> Result<(), String> {
+    println!("Connecting with: {}", token);
+    Ok(())
 }
-
 ---
 
 ## 🖼️ Embedded Content (Iframes)
