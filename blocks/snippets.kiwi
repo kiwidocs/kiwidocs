@@ -7,21 +7,21 @@ isMultiLine: true
 (args, body) => {
   const snippets = {};
   
-  // Normalize the body: ensure the very first line starts with @@ if it doesn't
-  const normalizedBody = body.trim().startsWith('@@') ? body.trim() : '@@' + body.trim();
-  
-  // Split by @@ at the start of a line
-  const parts = normalizedBody.split(/\n?@@/);
+  // Split by @@ that appears at the start of a line
+  // We add a virtual @@ to the start to catch the first language easily
+  const normalizedBody = "@@" + body.trim();
+  const parts = normalizedBody.split(/\n@@|@@/);
   
   parts.forEach(part => {
-    if (!part.trim()) return;
-    const colonIndex = part.indexOf(':');
+    const trimmed = part.trim();
+    if (!trimmed) return;
+    
+    const colonIndex = trimmed.indexOf(':');
     if (colonIndex === -1) return;
     
-    const lang = part.substring(0, colonIndex).trim();
-    const code = part.substring(colonIndex + 1).trim();
+    const lang = trimmed.substring(0, colonIndex).trim();
+    const code = trimmed.substring(colonIndex + 1).trim();
     
-    // HTML escape for safety
     const escapedCode = code
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
@@ -33,23 +33,13 @@ isMultiLine: true
   });
 
   const langs = Object.keys(snippets);
-  if (langs.length === 0) return `<div style="color:red">No snippets found. Use "lang: code" format.</div>`;
+  if (langs.length === 0) return `<div style="color:red">No snippets found.</div>`;
 
   const id = 'snippets-' + Math.random().toString(36).substr(2, 9);
   
-  // FIXED: The onclick now correctly updates the parent dataset 'active'
   let buttons = langs.map((lang, i) => 
     `<button class="tab-btn ${i === 0 ? 'active' : ''}" 
-             onclick="
-               const container = this.closest('.snippet-tabs');
-               container.dataset.active = '${lang}';
-               container.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-               this.classList.add('active');
-             ">${lang}</button>`
-  ).join('');
-
-  let contents = langs.map((lang, i) => 
-    `<div class="tab-content" data-lang="${lang}">${snippets[lang]}</div>`
+             onclick="const p=this.closest('.snippet-tabs'); p.dataset.active='${lang}'; p.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active')); this.classList.add('active');">${lang}</button>`
   ).join('');
 
   return `
@@ -63,17 +53,12 @@ isMultiLine: true
     `).join('')}
   </div>
   <style>
-    .snippet-tabs { border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; margin: 2rem 0; background: rgba(0,0,0,0.2); overflow: hidden; font-family: 'Inter', sans-serif; }
-    .tab-header { display: flex; background: rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.1); padding: 0 8px; }
-    .tab-btn { padding: 12px 20px; border: none; background: none; cursor: pointer; color: #8b949e; font-size: 0.85rem; font-weight: 500; transition: all 0.2s; border-bottom: 2px solid transparent; }
-    .tab-btn:hover { color: white; }
-    .tab-btn.active { color: #58a6ff; border-bottom-color: #58a6ff; }
-    .tab-body { background: transparent; }
-    .tab-content-wrapper { display: none; padding: 1.5rem; }
-    .tab-content-wrapper pre { margin: 0; padding: 0; background: transparent; }
-    
-    /* Logic to show/hide content based on parent attribute */
-    ${langs.map(l => `.snippet-tabs[data-active="${l}"] .tab-content-wrapper[data-lang="${l}"] { display: block !important; }`).join('\n')}
+    .snippet-tabs { border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; margin: 1.5rem 0; background: rgba(30,30,35,0.5); overflow: hidden; font-family: sans-serif; }
+    .tab-header { display: flex; background: rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .tab-btn { padding: 10px 18px; border: none; background: none; cursor: pointer; color: #8b949e; font-size: 0.8rem; transition: all 0.2s; border-bottom: 2px solid transparent; }
+    .tab-btn.active { color: #58a6ff; border-bottom-color: #58a6ff; background: rgba(88,166,255,0.05); }
+    .tab-content-wrapper { display: none; padding: 1rem; overflow-x: auto; }
+    ${langs.map(l => `.snippet-tabs[data-active="${l}"] .tab-content-wrapper[data-lang="${l}"] { display: block !important; }`).join('')}
   </style>
 </div>`.trim();
 }

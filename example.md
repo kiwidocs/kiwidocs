@@ -10,7 +10,7 @@ Kiwi allows you to mix standard Markdown with dynamic elements. Here is how you 
 Alerts are perfect for highlighting important information. They support custom titles and bodies.
 
 @alert(title="Pro Tip")
-You can use **Markdown** inside your alerts too! The system handles it seamlessly.
+You can use Markdown inside your alerts too! The system handles it seamlessly.
 
 @alert(title="Warning", color="#ff7b72")
 Always double check your triggers before publishing to production.
@@ -24,26 +24,19 @@ The `@snippets-per-type` block is ideal for developers. It creates an interactiv
 
 @snippets-per-type
 python:
-def authenticate_user(token):
-    # Initialize the secure connection
-    print(f"Connecting with: {token}")
-    return {"status": "success", "code": 200}
+def hello():
+    print("This is Python")
 
 @@javascript:
-async function authenticateUser(token) {
-    console.log("Connecting with: " + token);
-    const response = await fetch('/api/auth', {
-        method: 'POST',
-        body: JSON.stringify({ token })
-    });
-    return response.json();
+function hello() {
+    console.log("This is JS");
 }
 
 @@rust:
-fn authenticate_user(token: &str) -> Result<(), String> {
-    println!("Connecting with: {}", token);
-    Ok(())
+fn main() {
+    println!("This is Rust");
 }
+
 ---
 
 ## 🖼️ Embedded Content (Iframes)
