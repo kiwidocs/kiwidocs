@@ -168,17 +168,9 @@
 
             Object.values(blocksRegistry).forEach(block => {
                 if (block.isMultiLine) {
-                    // Regex to find start: @trigger(...) newline
-                    // Capture args and body
-                    // Warning: greedy matching for body might be dangerous.
-                    // Let's look for the pattern: @trigger(args)\nBODY
-                    // BODY ends when a new @trigger is found OR standard markdown headers # ? No, that's too restrictive.
-                    // Let's rely on the user to separate blocks if needed. 
-                    // Actually, let's strictly define: starts with @trigger
-                    // Arguments are optional in ()
-                    // Body follows until the next line starting with @
-
-                    const regex = new RegExp(`^${block.trigger}(?:\\((.*)\\))?\\s*\\n([\\s\\S]*?)(?=\\n@|$)`, 'gm');
+                    // Robust regex for multi-line blocks
+                    // Stops at the next line starting with @ followed by a non-@ character (another block) OR a markdown header
+                    const regex = new RegExp(`^${block.trigger}(?:\\((.*)\\))?\\s*\\n([\\s\\S]*?)(?=\\n@[^@]|$|\\n#)`, 'gm');
                     processed = processed.replace(regex, (match, args, body) => {
                         try {
                             return block.renderFn(args || '', body);

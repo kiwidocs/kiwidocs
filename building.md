@@ -1,125 +1,109 @@
-# Custom Building Blocks
+# ✨ Building with Kiwi
 
-Kiwi Docs supports custom "building blocks" that allow you to extend Markdown with dynamic components like tabbed snippets, iframes, and more.
+Kiwi Docs isn't just for static text. It supports **Building Blocks** — powerful, dynamic components that you can drop directly into your Markdown files to create rich, interactive documentation.
 
-## Usage
+## 🚀 How to Write Your Markdown!
 
-Blocks are stored in the `blocks/` directory of your repository. When you use a block trigger in your Markdown files, Kiwi will automatically render it.
+Adding dynamic content to your pages is as simple as writing a trigger. There are two types of blocks:
 
-### Included Blocks
+### 1. Single-Line Blocks
+Use these for components that only need basic settings.
+- **Syntax:** `@block-name(argument="value")`
+- **Example:** `@iframe(src="...", height="300px")`
 
-#### Snippets Per Type (`@snippets-per-type`)
+### 2. Multi-Line Blocks
+Use these for components that wrap around content or code.
+- **Syntax:**
+  ```markdown
+  @block-name
+  ... content here ...
+  ```
+- **Example:** The `@snippets-per-type` block uses this to hold your code.
 
-Displays code snippets in a tabbed interface. Useful for showing the same code in multiple languages.
+---
 
-**Syntax:**
+## 📦 Core Blocks Portfolio
+
+### 🧩 Snippets Per Type (`@snippets-per-type`)
+The ultimate way to show multi-language code. It automatically creates a beautiful tabbed interface for your snippets.
+
+**How to use it:**
+Use the `@snippets-per-type` trigger, followed by `@@` sections for each language.
+
 ```markdown
 @snippets-per-type
 @@python:
-print("Hello World")
-@@c++:
-std::cout << "Hello World";
+print("Hello from Kiwi!")
+
+@@javascript:
+console.log("Hello from Kiwi!");
+
+@@bash:
+echo "Hello from Kiwi!"
 ```
 
-#### Iframe (`@iframe`)
+### 🖼️ Iframe (`@iframe`)
+Embed websites, demos, or videos directly into your docs.
 
-Embeds an external URL in an iframe.
-
-**Syntax:**
+**How to use it:**
 ```markdown
-@iframe(src="https://example.com", height="500px")
+@iframe(src="https://example.com", height="400px")
 ```
 
-## Creating Custom Blocks
+---
 
-To create a new block, add a `.kiwi.json` file to the `blocks/` directory.
+## � Advanced Markdown Features
 
-### File Format (.kiwi)
+Kiwi leverages **Marked.js** for high-performance rendering. Besides standard Markdown, we've optimized several features:
 
-The file must be a JSON object with the following properties:
+### 📸 Rich Media
+You can embed images, videos, and audio using standard syntax. Kiwi automatically resolves relative paths to your GitHub repository!
+
+| Type | Syntax |
+| :--- | :--- |
+| **Image** | `![alt text](path/to/img.png)` |
+| **Video** | `![Video](path/to/video.mp4)` |
+| **Audio** | `![Audio](path/to/audio.mp3)` |
+
+### 📑 Automatic Table of Contents
+Every `h1`, `h2`, and `h3` is automatically scanned and added to the sidebar's **Table of Contents**. This keeps your navigation smooth and effortless.
+
+### 🔗 Smart Linking
+Links to other `.md` files (e.g., `[Setup Guide](setup.md)`) are automatically intercepted. They load instantly without a full page refresh, keeping your users in the flow.
+
+---
+
+## �🛠️ Creating Custom Blocks
+
+You can extend Kiwi with your own blocks by adding `.kiwi` files to the `blocks/` directory.
+
+### 1. The Block Definition (.kiwi)
+Each block is a JSON-like configuration file:
 
 ```json
 {
-  "name": "my-block",
-  "description": "Description of what it does",
-  "trigger": "@my-block",
-  "isMultiLine": true, // true if it consumes a body, false for single line
-  "renderer": "/* javascript code */"
+  "name": "my-component",
+  "description": "Short description",
+  "trigger": "@my-trigger",
+  "isMultiLine": true,
+  "renderer": "/* Javascript logic */"
 }
 ```
 
-### Renderer Function
+### 2. The Renderer API
+The `renderer` property is a string containing a JavaScript function body. It receives two variables:
 
-The `renderer` property contains the body of a JavaScript function. It receives `args` (string) and `body` (string, only if `isMultiLine` is true). It must return an HTML string.
+- `args`: A string containing everything inside the parentheses `(...)`.
+- `body`: (Multi-line only) The content provided below the trigger.
 
-**Example Renderer:**
-
+**Example Minimal Renderer:**
 ```javascript
 return (args, body) => {
-  return `<div class="my-block">${body}</div>`;
+  return `<div class="custom-box">${body}</div>`;
 }
 ```
 
-### API Reference
-
-- **`args`**: The string inside the parentheses of the trigger. E.g., for `@block(foo="bar")`, args is `foo="bar"`.
-- **`body`**: The content following the trigger line until the next block or end of section.
-
-## Best Practices
-
-1.  **Unique Triggers**: Ensure your `trigger` does not conflict with existing markdown syntax or other blocks. Start with `@`.
-2.  **Safety**: The renderer code runs in the user's browser. Avoid unsafe operations.
-3.  **Styling**: You can include `<style>` tags in your returned HTML to style your components. These styles will apply globally, so scope them to your component's class.
-
-
----
-# Custom Building Blocks Implementation - Walkthrough
-
-I have implemented the custom "building blocks" feature, enabling dynamic content in Markdown files.
-
-## Changes
-
-### 1. New Directory: `blocks/`
-
-I created a `blocks/` directory to store custom block definitions.
-
-- `blocks/snippets.kiwi`: Defines the `@snippets-per-type` block for tabbed code snippets.
-- `blocks/iframe.kiwi`: Defines the `@iframe` block for embedding external content.
-
-### 2. Updated `host/index.html`
-
-The main viewer was updated to:
-- Fetch `.kiwi` files from the `blocks/` directory (via GitHub API).
-- Parse the block definitions and their JavaScript renderers.
-- Process Markdown content to identify block triggers (e.g., `@iframe(...)`) and replace them with rendered HTML *before* passing the text to the Markdown parser.
-
-### 3. Documentation: `host/building.md`
-
-A new guide was created to explain:
-- How to use the included blocks (`@snippets-per-type`, `@iframe`).
-- How to create new blocks using the `.kiwi` JSON format.
-- The API for the renderer function.
-
-## Verification Results
-
-### Static Analysis
-- **`index.html`**: Verified that the `loadBlocks` function is called during initialization and `processBlocks` is used in `loadFile`.
-- **`blocks/*.kiwi`**: Verified the JSON structure and the renderer functions.
-- **`building.md`**: Verified the documentation covers usage and creation.
-
-### How to Test
-1.  Push these changes to your GitHub repository.
-2.  Create a markdown file with the following content:
-    ```markdown
-    # Test Block
-    
-    @iframe(src="https://example.com", height="300px")
-    
-    @snippets-per-type
-    @@python:
-    print("Test")
-    @@js:
-    console.log("Test");
-    ```
-3.  Open the Kiwi Docs viewer and navigate to that file.
-4.  You should see an iframe and a tabbed code block.
+### 💡 Best Practices
+- **Namespace your triggers**: Start with `@` (e.g., `@my-org-alert`).
+- **Style safely**: Use `<style>` tags within your renderer, but scope them to a unique class to avoid bleeding into other documentation.
+- **Keep it fast**: Avoid heavy external scripts inside renderers to maintain a snappy documentation experience.
