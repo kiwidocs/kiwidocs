@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Redirecting...</title>
+    <script>
+        // Get the current URL information
+        const currentPath = window.location.pathname;
+        const currentOrigin = window.location.origin;
+
+        // Construct the new URL: 
+        // If path is '/', it becomes '/host'
+        // If path is '/k', it becomes '/k/host'
+
+        // We remove any trailing slash from the current path to prevent '//host'
+        const cleanPath = currentPath.endsWith('/') ? currentPath.slice(0, -1) : currentPath;
+        const targetURL = currentOrigin + cleanPath + '/host';
+
+        // Perform the redirect
+        window.location.replace(targetURL);
+    </script>
+</head>
+
+<body>
+    <p>Redirecting you to <a id="link" href="#">the host page</a>...</p>
+    <script>
+        // Fallback: update the link text just in case JS takes a second
+        document.getElementById('link').href = window.location.origin + window.location.pathname + '/host';
+    </script>
+</body>
+
+</html>

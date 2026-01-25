@@ -1,3 +1,20 @@
+/*
+        Copyright (C) 2026 - Kiwi Docs by Veer Bajaj <https://github.com/kiwidocs>
+
+        This program is free software: you can redistribute it and/or modify
+        it under the terms of the GNU General Public License as published by
+        the Free Software Foundation, either version 3 of the License, or
+        (at your option) any later version.
+
+        This program is distributed in the hope that it will be useful,
+        but WITHOUT ANY WARRANTY; without even the implied warranty of
+        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        GNU General Public License for more details.
+
+        You should have received a copy of the GNU General Public License
+        along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
 /**
  * KiwiBlockLib - Handles custom building blocks for Markdown.
  * Supports simple Template blocks and complex Script blocks.
@@ -117,37 +134,45 @@ class KiwiBlockLib {
     }
 
     process(text) {
+        if (!text) return '';
         let processed = text;
 
         // Sort blocks: Multi-line first to avoid partial replacements
         const sortedBlocks = Object.values(this.registry).sort((a, b) => (b.isMultiLine ? 1 : 0) - (a.isMultiLine ? 1 : 0));
 
         sortedBlocks.forEach(block => {
-            if (block.isMultiLine) {
-                // Multi-line: Match trigger line and subsequent body
-                // Stops at next block or markdown header
-                const regex = new RegExp(`^${block.trigger}(?:\\((.*)\\))?\\s*\\r?\\n([\\s\\S]*?)(?=\\r?\\n@[^@]|$|\\r?\\n#)`, 'gm');
-                processed = processed.replace(regex, (match, args, body) => {
-                    try {
-                        const result = block.renderFn(args || '', body);
-                        return (typeof result === 'string' ? result.trim() : result) + '\n\n';
-                    } catch (e) {
-                        console.error(`Error rendering ${block.trigger}`, e);
-                        return `<div style="color:red">Error rendering ${block.trigger}</div>`;
-                    }
-                });
-            } else {
-                // Single-line: @trigger(args)
-                const regex = new RegExp(`${block.trigger}\\((.*?)\\)`, 'g');
-                processed = processed.replace(regex, (match, args) => {
-                    try {
-                        const result = block.renderFn(args || '');
-                        return typeof result === 'string' ? result.trim() : result;
-                    } catch (e) {
-                        console.error(`Error rendering ${block.trigger}`, e);
-                        return `[Error: ${block.trigger}]`;
-                    }
-                });
+            try {
+                if (block.isMultiLine) {
+                    // Multi-line: Match trigger line and subsequent body
+                    // Stops at next block (@...) or markdown header (#...)
+                    const regex = new RegExp(`^${block.trigger}(?:\\((.*)\\))?\\s*\\r?\\n([\\s\\S]*?)(?=\\r?\\n@[^@]|$|\\r?\\n#)`, 'gm');
+                    processed = processed.replace(regex, (match, args, body) => {
+                        try {
+                            const result = block.renderFn(args || '', body.trim());
+                            return (typeof result === 'string' ? result.trim() : result) + '\n\n';
+                        } catch (e) {
+                            console.error(`KiwiBlockLib: Error rendering multi-line ${block.trigger}`, e);
+                            return `<div style="color:rgba(255,0,0,0.8); border:1px solid red; padding:1rem; border-radius:8px; margin: 1rem 0;">
+                                <strong>Error rendering ${block.trigger}</strong><br>
+                                <small style="opacity:0.7">${e.message}</small>
+                            </div>`;
+                        }
+                    });
+                } else {
+                    // Single-line: @trigger(args)
+                    const regex = new RegExp(`${block.trigger}\\((.*?)\\)`, 'g');
+                    processed = processed.replace(regex, (match, args) => {
+                        try {
+                            const result = block.renderFn(args || '');
+                            return typeof result === 'string' ? result.trim() : result;
+                        } catch (e) {
+                            console.error(`KiwiBlockLib: Error rendering single-line ${block.trigger}`, e);
+                            return `<span style="color:red">[Error: ${block.trigger}]</span>`;
+                        }
+                    });
+                }
+            } catch (fatal) {
+                console.error(`KiwiBlockLib: Critical error processing ${block.trigger}`, fatal);
             }
         });
 

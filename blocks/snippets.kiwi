@@ -6,23 +6,33 @@ isMultiLine: true
 <script>
 (args, body) => {
   const snippets = {};
-  const parts = body.split('@@');
+  // Split by @@ at the start of a line
+  const parts = body.split(/\n?@@/);
+  
   parts.forEach(part => {
     if (!part.trim()) return;
     const colonIndex = part.indexOf(':');
     if (colonIndex === -1) return;
     const lang = part.substring(0, colonIndex).trim();
     const code = part.substring(colonIndex + 1).trim();
-    snippets[lang] = code;
+    // Basic HTML escape for the code content
+    const escapedCode = code
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+      
+    snippets[lang] = escapedCode;
   });
 
   const langs = Object.keys(snippets);
-  if (langs.length === 0) return '';
+  if (langs.length === 0) return `<div style="color:red">No snippets found in @snippets-per-type</div>`;
 
   const id = 'snippets-' + Math.random().toString(36).substr(2, 9);
   
   let buttons = langs.map((lang, i) => 
-    `<button class="tab-btn ${i === 0 ? 'active' : ''}" onclick="document.getElementById('${id}').dataset.active = '${lang}'; this.parentElement.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); this.classList.add('active');">${lang}</button>`
+    `<button class="tab-btn ${i === 0 ? 'active' : ''}" onclick="const p = this.closest('.snippet-tabs'); p.dataset.active = '${lang}'; p.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); this.classList.add('active');">${lang}</button>`
   ).join('');
 
   let contents = langs.map((lang, i) => 
@@ -36,13 +46,15 @@ isMultiLine: true
     ${contents}
   </div>
   <style>
-    .snippet-tabs { border: 1px solid var(--border-color, #e1e4e8); border-radius: 6px; margin: 16px 0; background: var(--bg-secondary, #f6f8fa); }
-    .tab-header { display: flex; border-bottom: 1px solid var(--border-color, #e1e4e8); background: var(--bg-tertiary, #f0f2f4); border-radius: 6px 6px 0 0; overflow: hidden; }
-    .tab-btn { padding: 8px 16px; border: none; background: none; cursor: pointer; border-right: 1px solid var(--border-color, #e1e4e8); font-size: 14px; color: var(--text-color, #24292e); }
-    .tab-btn:hover { background: rgba(0,0,0,0.05); }
-    .tab-btn.active { background: var(--bg-primary, #ffffff); font-weight: 600; border-bottom: 2px solid #0969da; }
-    .tab-body { padding: 16px; background: var(--bg-primary, #ffffff); border-radius: 0 0 6px 6px; }
-    .tab-content pre { margin: 0; padding: 0; background: transparent; }
+    .snippet-tabs { border: 1px solid var(--border-color, rgba(255,255,255,0.1)); border-radius: 12px; margin: 2rem 0; background: rgba(0,0,0,0.2); overflow: hidden; }
+    .tab-header { display: flex; background: rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.1); padding: 0 8px; }
+    .tab-btn { padding: 12px 20px; border: none; background: none; cursor: pointer; color: var(--text-dim, #8b949e); font-size: 0.85rem; font-weight: 500; font-family: 'Inter', sans-serif; transition: all 0.2s; border-bottom: 2px solid transparent; }
+    .tab-btn:hover { color: white; background: rgba(255,255,255,0.05); }
+    .tab-btn.active { color: var(--accent-primary, #58a6ff); border-bottom-color: var(--accent-primary, #58a6ff); background: rgba(88, 166, 255, 0.05); }
+    .tab-body { padding: 0; background: transparent; }
+    .tab-content { padding: 1.5rem; }
+    .tab-content pre { margin: 0; padding: 0; background: transparent; border: none; }
+    .tab-content code { background: transparent; padding: 0; color: #e6edf3; }
     .snippet-tabs[data-active] .tab-content { display: none !important; }
     ${langs.map(l => `.snippet-tabs[data-active="${l}"] .tab-content[data-lang="${l}"] { display: block !important; }`).join('\n')}
   </style>
