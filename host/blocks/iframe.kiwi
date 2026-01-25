@@ -1,0 +1,7 @@
+{
+  "name": "iframe",
+  "description": "Embeds an iframe",
+  "trigger": "@iframe",
+  "isMultiLine": false,
+  "renderer": "/* Javascript code string */\nreturn (args) => {\n  // args is string like: src=\"url\", height=\"400px\"\n  const parseArgs = (str) => {\n    const res = {};\n    const regex = /(\\w+)=\"([^\"]*)\"/g;\n    let match;\n    while ((match = regex.exec(str)) !== null) {\n      res[match[1]] = match[2];\n    }\n    return res;\n  };\n  \n  const props = parseArgs(args);\n  const src = props.src || '';\n  const height = props.height || '400px';\n  const width = props.width || '100%';\n  \n  if (!src) return '<div style=\"color:red\">Error: Missing src in iframe block</div>';\n\n  return `<iframe src=\"${src}\" width=\"${width}\" height=\"${height}\" style=\"border:none; border-radius: 8px; background: #eee;\" loading=\"lazy\"></iframe>`;\n}"
+}

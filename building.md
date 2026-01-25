@@ -73,37 +73,55 @@ Links to other `.md` files (e.g., `[Setup Guide](setup.md)`) are automatically i
 
 ---
 
-## �🛠️ Creating Custom Blocks
+## 🛠️ Creating Custom Blocks (New Format)
 
-You can extend Kiwi with your own blocks by adding `.kiwi` files to the `blocks/` directory.
+Kiwi now uses a simplified, file-per-block system in the `blocks/` directory. Each block is a `.kiwi` file using a Markdown-like frontmatter. This format is designed to be **AI-friendly** and **human-readable**.
 
-### 1. The Block Definition (.kiwi)
-Each block is a JSON-like configuration file:
+### 1. The Block Structure
+A `.kiwi` file consists of two parts: a YAML-like header and the HTML template.
 
-```json
-{
-  "name": "my-component",
-  "description": "Short description",
-  "trigger": "@my-trigger",
-  "isMultiLine": true,
-  "renderer": "/* Javascript logic */"
-}
+```markdown
+---
+name: Alert
+trigger: @alert
+isMultiLine: true
+---
+<div class="custom-alert">
+  <h3>{title|Important}</h3>
+  <p>{body}</p>
+</div>
 ```
 
-### 2. The Renderer API
-The `renderer` property is a string containing a JavaScript function body. It receives two variables:
+- **`trigger`**: The @command used in Markdown.
+- **`isMultiLine`**: Set to `true` if the block should capture code/text below it.
+- **`{key}`**: Placeholders that are replaced by arguments (e.g., `@alert(title="Warning")`).
+- **`{body}`**: Used in multi-line blocks to inject the content.
 
-- `args`: A string containing everything inside the parentheses `(...)`.
-- `body`: (Multi-line only) The content provided below the trigger.
+### 2. Logic-Powered Blocks
+If you need complex logic (like our tabbed snippets), you can use a `<script>` tag inside the `.kiwi` file. The script should return a renderer function:
 
-**Example Minimal Renderer:**
-```javascript
-return (args, body) => {
-  return `<div class="custom-box">${body}</div>`;
+```html
+---
+trigger: @my-logic
+isMultiLine: true
+---
+<script>
+(args, body) => {
+  // Your custom JS logic here
+  return `<div>Processed ${body}</div>`;
 }
+</script>
 ```
 
-### 💡 Best Practices
-- **Namespace your triggers**: Start with `@` (e.g., `@my-org-alert`).
-- **Style safely**: Use `<style>` tags within your renderer, but scope them to a unique class to avoid bleeding into other documentation.
-- **Keep it fast**: Avoid heavy external scripts inside renderers to maintain a snappy documentation experience.
+### ⚙️ The Engine: `blocklib.js`
+The heavy lifting is now handled by `host/blocklib.js`. It automatically:
+1. Fetches all `.kiwi` files from your repository.
+2. Compiles templates or executes scripts.
+3. Injects them into your Markdown *before* parsing, ensuring a seamless experience.
+
+---
+
+### 💡 Best Practices for AI & Humans
+- **Keep it Simple**: Use the template format `{arg}` whenever possible.
+- **Self-Contained Styles**: Include `<style>` tags directly in your `.kiwi` file to keep blocks portable.
+- **Namespace**: Use consistent triggers like `@ui-button` or `@dev-note`.

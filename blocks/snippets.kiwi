@@ -1,7 +1,51 @@
-{
-  "name": "snippets-per-type",
-  "description": "Displays code snippets in tabs",
-  "trigger": "@snippets-per-type",
-  "isMultiLine": true,
-  "renderer": "/* Javascript code string returning HTML */\nreturn (args, body) => {\n  const snippets = {};\n  const parts = body.split('@@');\n  parts.forEach(part => {\n    if (!part.trim()) return;\n    const colonIndex = part.indexOf(':');\n    if (colonIndex === -1) return;\n    const lang = part.substring(0, colonIndex).trim();\n    const code = part.substring(colonIndex + 1).trim();\n    snippets[lang] = code;\n  });\n\n  const langs = Object.keys(snippets);\n  if (langs.length === 0) return '';\n\n  const id = 'snippets-' + Math.random().toString(36).substr(2, 9);\n  \n  let buttons = langs.map((lang, i) => \n    `<button class=\"tab-btn ${i === 0 ? 'active' : ''}\" onclick=\"document.getElementById('${id}').dataset.active = '${lang}'; this.parentElement.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); this.classList.add('active');\">${lang}</button>`\n  ).join('');\n\n  let contents = langs.map((lang, i) => \n    `<div class=\"tab-content\" data-lang=\"${lang}\" style=\"${i === 0 ? 'display: block;' : 'display: none;'}\"><pre><code class=\"language-${lang.toLowerCase()}\">${snippets[lang]}</code></pre></div>`\n  ).join('');\n\n  return `\n    <div id=\"${id}\" class=\"snippet-tabs\" data-active=\"${langs[0]}\">\n      <div class=\"tab-header\">${buttons}</div>\n      <div class=\"tab-body\">\n        ${contents}\n      </div>\n      <style>\n        .snippet-tabs { border: 1px solid var(--border-color, #e1e4e8); border-radius: 6px; margin: 16px 0; background: var(--bg-secondary, #f6f8fa); }\n        .tab-header { display: flex; border-bottom: 1px solid var(--border-color, #e1e4e8); background: var(--bg-tertiary, #f0f2f4); border-radius: 6px 6px 0 0; overflow: hidden; }\n        .tab-btn { padding: 8px 16px; border: none; background: none; cursor: pointer; border-right: 1px solid var(--border-color, #e1e4e8); font-size: 14px; color: var(--text-color, #24292e); }\n        .tab-btn:hover { background: rgba(0,0,0,0.05); }\n        .tab-btn.active { background: var(--bg-primary, #ffffff); font-weight: 600; border-bottom: 2px solid #0969da; }\n        .tab-body { padding: 16px; background: var(--bg-primary, #ffffff); border-radius: 0 0 6px 6px; }\n        .tab-content pre { margin: 0; padding: 0; background: transparent; }\n        /* Dynamic visibility based on parent data attribute */\n        .snippet-tabs[data-active] .tab-content { display: none !important; }\n        ${langs.map(l => `.snippet-tabs[data-active=\"${l}\"] .tab-content[data-lang=\"${l}\"] { display: block !important; }`).join('\\n')}\n      </style>\n    </div>\n  `;\n}"
+---
+name: Snippets
+trigger: @snippets-per-type
+isMultiLine: true
+---
+<script>
+(args, body) => {
+  const snippets = {};
+  const parts = body.split('@@');
+  parts.forEach(part => {
+    if (!part.trim()) return;
+    const colonIndex = part.indexOf(':');
+    if (colonIndex === -1) return;
+    const lang = part.substring(0, colonIndex).trim();
+    const code = part.substring(colonIndex + 1).trim();
+    snippets[lang] = code;
+  });
+
+  const langs = Object.keys(snippets);
+  if (langs.length === 0) return '';
+
+  const id = 'snippets-' + Math.random().toString(36).substr(2, 9);
+  
+  let buttons = langs.map((lang, i) => 
+    `<button class="tab-btn ${i === 0 ? 'active' : ''}" onclick="document.getElementById('${id}').dataset.active = '${lang}'; this.parentElement.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); this.classList.add('active');">${lang}</button>`
+  ).join('');
+
+  let contents = langs.map((lang, i) => 
+    `<div class="tab-content" data-lang="${lang}" style="${i === 0 ? 'display: block;' : 'display: none;'}"><pre><code class="language-${lang.toLowerCase()}">${snippets[lang]}</code></pre></div>`
+  ).join('');
+
+  return `
+<div id="${id}" class="snippet-tabs" data-active="${langs[0]}">
+  <div class="tab-header">${buttons}</div>
+  <div class="tab-body">
+    ${contents}
+  </div>
+  <style>
+    .snippet-tabs { border: 1px solid var(--border-color, #e1e4e8); border-radius: 6px; margin: 16px 0; background: var(--bg-secondary, #f6f8fa); }
+    .tab-header { display: flex; border-bottom: 1px solid var(--border-color, #e1e4e8); background: var(--bg-tertiary, #f0f2f4); border-radius: 6px 6px 0 0; overflow: hidden; }
+    .tab-btn { padding: 8px 16px; border: none; background: none; cursor: pointer; border-right: 1px solid var(--border-color, #e1e4e8); font-size: 14px; color: var(--text-color, #24292e); }
+    .tab-btn:hover { background: rgba(0,0,0,0.05); }
+    .tab-btn.active { background: var(--bg-primary, #ffffff); font-weight: 600; border-bottom: 2px solid #0969da; }
+    .tab-body { padding: 16px; background: var(--bg-primary, #ffffff); border-radius: 0 0 6px 6px; }
+    .tab-content pre { margin: 0; padding: 0; background: transparent; }
+    .snippet-tabs[data-active] .tab-content { display: none !important; }
+    ${langs.map(l => `.snippet-tabs[data-active="${l}"] .tab-content[data-lang="${l}"] { display: block !important; }`).join('\n')}
+  </style>
+</div>`.trim();
 }
+</script>
