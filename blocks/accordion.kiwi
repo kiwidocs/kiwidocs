@@ -1,0 +1,18 @@
+---
+name: Accordion
+trigger: accordion
+isMultiLine: false
+---
+<details style="margin: 12px 0; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; background: rgba(255,255,255,0.02);">
+    <summary style="padding: 12px 16px; cursor: pointer; font-weight: 600; color: #adbac7; list-style: none; display: flex; justify-content: space-between; align-items: center;">
+        <span>{title|Expand for details}</span>
+        <span style="font-size: 0.8em; opacity: 0.5;">▼</span>
+    </summary>
+    <div style="padding: 12px 16px; border-top: 1px solid rgba(255, 255, 255, 0.1); color: #8b949e; line-height: 1.5;">
+        {body|No content provided.}
+    </div>
+</details>
+<style>
+details summary::-webkit-details-marker { display: none; }
+details[open] summary span:last-child { transform: rotate(180deg); }
+</style>

@@ -1,0 +1,12 @@
+---
+name: Avatar
+trigger: avatar
+isMultiLine: false
+---
+<div style="display: flex; align-items: center; gap: 12px; margin: 16px 0; background: rgba(255,255,255,0.03); padding: 8px 16px; border-radius: 50px; width: fit-content; border: 1px solid rgba(255,255,255,0.05);">
+    <img src="{src|https://i.pravatar.cc/100}" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 2px solid #58a6ff;">
+    <div>
+        <div style="font-weight: 600; color: #adbac7; font-size: 0.95em;">{name|User Name}</div>
+        <div style="font-size: 0.75em; color: #8b949e;">{subtext|Contributor}</div>
+    </div>
+</div>

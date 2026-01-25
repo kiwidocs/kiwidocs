@@ -1,0 +1,13 @@
+---
+name: Quote
+trigger: quote
+isMultiLine: false
+---
+<blockquote style="margin: 24px 0; padding: 20px 30px; border-left: 4px solid #58a6ff; background: rgba(88, 166, 255, 0.05); border-radius: 0 12px 12px 0; position: relative;">
+    <div style="font-size: 1.1em; line-height: 1.6; color: #adbac7; font-style: italic; margin-bottom: 12px;">"{text|This represents a significant step forward in how we handle developer documentation.}"</div>
+    <footer style="display: flex; align-items: center; gap: 8px;">
+        <span style="font-weight: 600; color: #58a6ff;">— {author|Alex Rivera}</span>
+        <span style="color: #8b949e; font-size: 0.85em;">{role|CEO at KiwiTech}</span>
+    </footer>
+    <span style="position: absolute; top: 10px; left: 10px; font-size: 3em; opacity: 0.1; color: #58a6ff; font-family: serif;">"</span>
+</blockquote>

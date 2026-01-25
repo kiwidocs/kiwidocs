@@ -1,0 +1,10 @@
+---
+name: Hero
+trigger: hero
+isMultiLine: false
+---
+<div style="background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://picsum.photos/1200/400'); background-size: cover; background-position: center; padding: 60px 20px; text-align: center; border-radius: 16px; margin: 24px 0; color: white;">
+    <h1 style="font-size: 2.5em; margin-bottom: 16px; color: white; border-bottom: none;">{title|Welcome to Kiwi}</h1>
+    <p style="font-size: 1.2em; opacity: 0.9; max-width: 600px; margin: 0 auto 24px auto;">{subtitle|The next generation documentation tool for modern teams.}</p>
+    <a href="{buttonUrl|#}" style="background: #58a6ff; color: white; padding: 12px 32px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-block; transition: background 0.2s;">{buttonText|Get Started}</a>
+</div>

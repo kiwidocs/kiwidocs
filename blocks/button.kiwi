@@ -1,0 +1,6 @@
+---
+name: Button
+trigger: button
+isMultiLine: false
+---
+<a href="{url|#}" style="display: inline-block; padding: 10px 24px; background: linear-gradient(135deg, {color1|#58a6ff}, {color2|#bc8cff}); color: white; border-radius: 50px; text-decoration: none; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: all 0.3s ease; text-align: center; margin: 10px 0;"> {text|Click Me} </a>
