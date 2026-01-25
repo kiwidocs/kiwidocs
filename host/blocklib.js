@@ -137,100 +137,42 @@ class KiwiBlockLib {
 
     process(text) {
         if (!text) return '';
+        let processed = text;
 
-        // Line-by-line State Machine Parser
-        // Syntax: 
-        // +++ blockName(args)
-        // Body...
-        // +++
+        // Syntax: <!-- @trigger(args) -->
+        // We look for HTML comments that start with @Key
+        const regex = /<!--\s*@([a-zA-Z0-9_-]+)(?:\((.*?)\))?\s*-->/gs;
 
-        const lines = text.split(/\r?\n/);
-        const output = [];
-        let currentBlock = null;
-        let buffer = [];
+        processed = processed.replace(regex, (match, name, args) => {
+            const block = this.registry[name];
 
-        for (let i = 0; i < lines.length; i++) {
-            const line = lines[i];
-            const trimmed = line.trim();
-
-            // Check for Block Start: +++ name(args)
-            if (trimmed.startsWith('+++ ') && !currentBlock) {
-                const match = trimmed.match(/^\+\+\+\s+([a-zA-Z0-9_-]+)(?:\((.*)\))?$/);
-                if (match) {
-                    const name = match[1];
-                    const args = match[2] || '';
-                    const block = this.registry[name];
-
-                    if (block) {
-                        if (block.isMultiLine) {
-                            // Start capturing multi-line block
-                            currentBlock = { block, args };
-                            buffer = [];
-                        } else {
-                            // Render single-line block immediately
-                            try {
-                                output.push(this.renderBlock(block, args, ''));
-                            } catch (e) {
-                                output.push(this.renderError(name, e));
-                            }
-                        }
-                    } else {
-                        // Unknown block - leave as text or show error?
-                        // Let's show a friendly warning in the rendered output
-                        output.push(`<div style="color:orange; border:1px solid orange; padding:4px;">⚠️ Unknown Block: ${name}</div>`);
-                    }
-                    continue; // Skip adding this line to output
-                }
+            if (!block) {
+                // If it's just a normal comment or unknown block, leave it? 
+                // Or maybe the user made a typo.
+                // For now, let's log it but maybe not render an error in place to be less intrusive,
+                // OR render a small warning if it clearly looks like a block attempt.
+                console.warn(`KiwiBlockLib: Unknown block "${name}"`);
+                return match; // Leave comment as is (invisible in rendered HTML usually)
             }
 
-            // Check for Block End: +++
-            if (trimmed === '+++' && currentBlock) {
-                // Render the captured block
-                try {
-                    // content is buffer joined by newline
-                    output.push(this.renderBlock(currentBlock.block, currentBlock.args, buffer.join('\n')));
-                } catch (e) {
-                    output.push(this.renderError(currentBlock.block.trigger, e));
-                }
-                currentBlock = null;
-                buffer = [];
-                continue;
-            }
-
-            // State Handling
-            if (currentBlock) {
-                buffer.push(line);
-            } else {
-                output.push(line);
-            }
-        }
-
-        // If we hit EOF with an open block, flush it (maybe warn?)
-        if (currentBlock) {
             try {
-                output.push(this.renderBlock(currentBlock.block, currentBlock.args, buffer.join('\n')));
+                // Render the block
+                // We don't support multi-line body in this syntax, everything is in args.
+                // We pass empty string as body.
+                const result = block.renderFn(args || '', '');
+                let finalHtml = typeof result === 'string' ? result.trim() : result;
+
+                // Surround with newlines to ensure it breaks out of markdown paragraphs if needed
+                return `\n\n${finalHtml}\n\n`;
             } catch (e) {
-                output.push(this.renderError(currentBlock.block.trigger, e));
+                console.error(`KiwiBlockLib: Error rendering ${name}`, e);
+                return `<div style="border: 1px solid red; color: red; padding: 10px;">
+                    <strong>Block Error (${name})</strong>: ${e.message}
+                </div>`;
             }
-        }
+        });
 
-        return output.join('\n');
-    }
-
-    renderBlock(block, args, body) {
-        let result = block.renderFn(args, body);
-        if (typeof result === 'string') {
-            result = result.trim();
-        }
-        // Surround with extra newlines to ensure Markdown separates it from paragraphs
-        return `\n\n${result}\n\n`;
-    }
-
-    renderError(name, error) {
-        console.error(`KiwiBlockLib: Error rendering ${name}`, error);
-        return `<div style="border: 1px solid red; color: red; padding: 0.5rem; margin: 0.5rem 0; border-radius: 6px;">
-            <strong>Block Error (${name})</strong>: ${error.message}
-        </div>`;
+        return processed;
     }
 }
 

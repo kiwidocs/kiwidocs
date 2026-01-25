@@ -1,39 +1,40 @@
 ---
 name: Snippets
 trigger: snippets-per-type
-isMultiLine: true
+isMultiLine: false
 ---
 <script>
-(args, body) => {
-  const snippets = {};
+(args) => {
+  // Parse arguments passed as key="value"
+  // Since our blocklib.js handles parsing arguments into a 'props' object effectively via renderTemplate (if we used it),
+  // but here we are in a raw script. 
+  // Wait, blocklib.js passes 'args' string to renderFn. We need to parse it ourselves or use a helper?
+  // BlockLib has `parseArgs` but it's an instance method. 
+  // We can duplicate the simple regex parser here or rely on the Fact that args is the raw string inside parens.
   
-  // 1. Handle content that might be on the same line as the trigger
-  // 2. Ensure we split correctly by @@ while preserving the first language
-  const normalizedBody = body.trim().startsWith('@@') ? body.trim() : '@@' + body.trim();
-  const parts = normalizedBody.split(/\n@@|@@/);
-  
-  parts.forEach(part => {
-    const trimmed = part.trim();
-    if (!trimmed) return;
-    const colonIndex = trimmed.indexOf(':');
-    if (colonIndex === -1) return;
-    
-    const lang = trimmed.substring(0, colonIndex).trim();
-    const code = trimmed.substring(colonIndex + 1).trim();
-    
-    // Escape HTML to prevent code from rendering as actual elements
-    const escapedCode = code
-      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-      
-    snippets[lang] = escapedCode;
-  });
+  const parseArgs = (str) => {
+    const res = {};
+    if (!str) return res;
+    // Regex to match key="value" handling escaped quotes if needed? generic simple parser
+    const regex = /(\w+)=\"([^\"]*)\"/g;
+    let match;
+    while ((match = regex.exec(str)) !== null) {
+        res[match[1]] = match[2];
+    }
+    return res;
+  };
 
+  const snippets = parseArgs(args);
   const langs = Object.keys(snippets);
-  if (langs.length === 0) return `<div style="color:red">No snippets found.</div>`;
+  
+  if (langs.length === 0) return `<div style="color:red">No snippets provided. Use python="..." etc.</div>`;
 
   const id = 'kiwi-snip-' + Math.random().toString(36).substr(2, 5);
   
+  // Helper to escape HTML in the code string (which is already inside quotes in the arg)
+  // Converting the argument value to safe HTML
+  const escapeHtml = (str) => str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+
   const buttons = langs.map((lang, i) => 
     `<button class="tab-btn ${i === 0 ? 'active' : ''}" 
              onclick="const p=this.closest('.snippet-tabs'); p.dataset.active='${lang}'; p.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active')); this.classList.add('active');">${lang}</button>`
@@ -45,7 +46,7 @@ isMultiLine: true
   <div class="tab-body">
     ${langs.map(lang => `
       <div class="tab-content-wrapper" data-lang="${lang}">
-        <pre><code class="language-${lang.toLowerCase()}">${snippets[lang]}</code></pre>
+        <pre><code class="language-${lang.toLowerCase()}">${escapeHtml(snippets[lang])}</code></pre>
       </div>
     `).join('')}
   </div>

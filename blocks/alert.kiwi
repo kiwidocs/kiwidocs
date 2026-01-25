@@ -1,7 +1,7 @@
 ---
 name: Alert
 trigger: alert
-isMultiLine: true
+isMultiLine: false
 ---
 <div style="padding: 1rem; background: rgba(88, 166, 255, 0.1); border-left: 4px solid var(--accent-primary, #58a6ff); border-radius: 8px; margin: 1.5rem 0; color: white;">
   <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-weight: 600;">

@@ -4,40 +4,40 @@ Kiwi Docs isn't just for static text. It supports **Building Blocks** — powerf
 
 ## 🚀 How to Write Your Markdown!
 
-Adding dynamic content to your pages is simple. We use the `+++` syntax, which is clear and robust.
+Adding dynamic content to your pages is clean and invisible to standard parsers. We use **HTML Comments** to define blocks.
 
-### 1. Single-Line Blocks
-Use these for components like iframes or animations.
-- **Syntax:** `+++ blockName(arguments)`
-- **Example:** `+++ typing(lines="Hello World")`
+### The Syntax
+All blocks follow this simple pattern:
+`<!-- @blockName(argument="value"; arg2="value") -->`
 
-### 2. Multi-Line Blocks
-Use these for components that wrap around content or code. Start with `+++ name` and end with `+++`.
-- **Syntax:**
-  ```markdown
-  +++ blockName
-  ... content here ...
-  +++
-  ```
-- **Example:** The `snippets-per-type` block uses this to hold your code.
+### Why Comments?
+1.  **Invisible Failure**: If JavaScript fails, your users see clean Markdown, not broken code.
+2.  **Standard Compliant**: Works in any Markdown editor (Obsidian, VS Code, GitHub).
+3.  **Clean**: Doesn't clutter your preview with weird symbols.
 
 ---
 
 ## 📦 Core Blocks Portfolio
 
 ### 🧩 Snippets Per Type (`snippets-per-type`)
-The ultimate way to show multi-language code.
+Define code for multiple languages using arguments.
 
 **How to use it:**
 
 ```markdown
-+++ snippets-per-type
-@@python:
-print("Hello from Kiwi!")
+<!-- @snippets-per-type(
+    python="print('Hello World')";
+    javascript="console.log('Hello World')";
+    rust="println!('Hello World')"
+) -->
+```
 
-@@javascript:
-console.log("Hello from Kiwi!");
-+++
+### 📢 Alerts (`alert`)
+Show a highlighted message box.
+
+**How to use it:**
+```markdown
+<!-- @alert(title="Important"; body="Pass your content in the body argument!") -->
 ```
 
 ### 🖼️ Iframe (`iframe`)
@@ -45,7 +45,7 @@ Embed websites, demos, or videos directly into your docs.
 
 **How to use it:**
 ```markdown
-+++ iframe(src="https://example.com", height="400px")
+<!-- @iframe(src="https://example.com"; height="400px") -->
 ```
 
 ---

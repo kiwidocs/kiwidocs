@@ -1,70 +1,34 @@
 # 🧪 Kiwi Building Blocks Showcase
 
-p
-+++ typing(lines="Welcome+to+the+Kiwi+Showcase;Exploring+Building+Blocks;Modern+Documentation+Simplified", color="00BCD4")
+v3
+<!-- @typing(lines="Welcome+to+Comment+Blocks;Clean+Syntax;No+Raw+HTML"; color="00BCD4") -->
 
-Kiwi allows you to mix standard Markdown with dynamic elements. Here is how you can use the core library.
+Kiwi now uses standard HTML comments for its building blocks. This ensures that if for any reason the JavaScript doesn't load, your users just see clean Markdown—no raw code!
 
 ---
 
 ## 📢 Alerts
-Alerts are perfect for highlighting important information. They support custom titles and bodies.
+Alerts are perfect for highlighting important information.
 
-+++ alert(title="Pro Tip")
-You can use **Markdown** inside your alerts too! The system handles it seamlessly.
-+++
+<!-- @alert(title="Pro Tip"; body="You can pass content directly in the arguments!") -->
 
-+++ alert(title="Warning", color="#ff7b72")
-Always double check your triggers before publishing to production.
-+++
+<!-- @alert(title="Warning"; color="#ff7b72"; body="Make sure to escape quotes in your arguments.") -->
 
 ---
 
-## 💻 Multi-Language Code Snippets
-The `snippets-per-type` block is ideal for developers. It creates an interactive, tabbed interface.
+## 💻 Code Snippets
+Developers can easily show multi-language code tabs.
 
-+++ snippets-per-type
-@@python:
-def hello_kiwi():
-    print("Welcome to the modern docs!")
-    return True
-
-@@javascript:
-function helloKiwi() {
-  console.log("Welcome to the modern docs!");
-  return true;
-}
-
-@@rust:
-fn main() {
-    println!("Welcome to the modern docs!");
-}
-+++
+<!-- @snippets-per-type(python="print('Hello World')"; javascript="console.log('Hello World')"; rust="println!('Hello World')") -->
 
 ---
 
-## 🖼️ Embedded Content (Iframes)
-Easily embed external sites, demos, or videos.
+## 🖼️ Embedded Content
+Embed external sites seamlessly.
 
-+++ iframe(src="https://example.com", height="300px")
+<!-- @iframe(src="https://example.com"; height="400px") -->
 
 ---
 
 ## 🛠️ How it works
-This page is written in pure Markdown. The blocks are processed by `blocklib.js` on the client side, then passed to the Markdown parser.
-
-### Standard Markdown Test
-- List item 1
-- List item 2
-  - Nested item
-
-1. Numbered 1
-2. Numbered 2
-
-> This is a blockquote to test standard rendering alongside our custom blocks.
-
-| Feature | Support |
-| :--- | :--- |
-| Markdown | ✅ Full |
-| Blocks | ✅ Native |
-| Dark Mode | ✅ Auto |
+The `blocklib.js` engine identifies `<!-- @blockName(...) -->` comments and replaces them with rich HTML components *before* the Markdown is parsed. This keeps your source file clean and standard-compliant.
