@@ -125,8 +125,84 @@
         const ENDPOINTS = {
             contents: `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents?ref=${CONFIG.branch}`,
             commits: `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/commits?sha=${CONFIG.branch}&per_page=5`,
-            raw: (path) => `https://raw.githubusercontent.com/${CONFIG.owner}/${CONFIG.repo}/${CONFIG.branch}/${path}`
+            raw: (path) => `https://raw.githubusercontent.com/${CONFIG.owner}/${CONFIG.repo}/${CONFIG.branch}/${path}`,
+            blocks: `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/blocks?ref=${CONFIG.branch}`
         };
+
+        const blocksRegistry = {};
+
+        async function loadBlocks() {
+            try {
+                const res = await fetch(ENDPOINTS.blocks);
+                if (!res.ok) return; // No blocks folder
+                const files = await res.json();
+                const kiwiFiles = files.filter(f => f.name.endsWith('.kiwi'));
+
+                await Promise.all(kiwiFiles.map(async (file) => {
+                    try {
+                        const rawRes = await fetch(ENDPOINTS.raw(file.path));
+                        const json = await rawRes.json();
+                        // Parse renderer function safely-ish (it's client side running trusted repo code)
+                        const renderer = new Function(json.renderer)();
+                        blocksRegistry[json.trigger] = { ...json, renderFn: renderer };
+                        console.log(`Loaded block: ${json.name}`);
+                    } catch (e) {
+                        console.error(`Failed to load block ${file.name}`, e);
+                    }
+                }));
+            } catch (e) {
+                console.warn("Could not load blocks directory", e);
+            }
+        }
+
+        function processBlocks(text) {
+            let processed = text;
+
+            // 1. Handle Multi-line blocks
+            // Format: @blockname(args) \n content \n ...
+            // We need to parse this carefully.
+            // Simple regex approach: ^@blockname(\(.*\))?\s*\n((?:.|\n)*?)(?=\n@|\Z)
+            // But getting the end is tricky.
+            // Let's assume blocks that consume content go until another block or EOF if not explicitly terminated?
+            // Better: use specific syntax for content or just regex for known blocks.
+
+            Object.values(blocksRegistry).forEach(block => {
+                if (block.isMultiLine) {
+                    // Regex to find start: @trigger(...) newline
+                    // Capture args and body
+                    // Warning: greedy matching for body might be dangerous.
+                    // Let's look for the pattern: @trigger(args)\nBODY
+                    // BODY ends when a new @trigger is found OR standard markdown headers # ? No, that's too restrictive.
+                    // Let's rely on the user to separate blocks if needed. 
+                    // Actually, let's strictly define: starts with @trigger
+                    // Arguments are optional in ()
+                    // Body follows until the next line starting with @
+
+                    const regex = new RegExp(`^${block.trigger}(?:\\((.*)\\))?\\s*\\n([\\s\\S]*?)(?=\\n@|$)`, 'gm');
+                    processed = processed.replace(regex, (match, args, body) => {
+                        try {
+                            return block.renderFn(args || '', body);
+                        } catch (e) {
+                            console.error(`Error rendering ${block.name}`, e);
+                            return `<div style="color:red; border:1px solid red; padding:4px;">Error rendering ${block.name}</div>`;
+                        }
+                    });
+                } else {
+                    // Single line: @trigger(args)
+                    const regex = new RegExp(`${block.trigger}\\((.*?)\\)`, 'g');
+                    processed = processed.replace(regex, (match, args) => {
+                        try {
+                            return block.renderFn(args || '');
+                        } catch (e) {
+                            console.error(`Error rendering ${block.name}`, e);
+                            return `[Error: ${block.name}]`;
+                        }
+                    });
+                }
+            });
+
+            return processed;
+        }
 
         // Initialize UI from CONFIG
         function applyBranding() {
@@ -161,7 +237,7 @@
         async function init() {
             applyBranding();
             try {
-                await Promise.all([loadFileList(), refreshActivity()]);
+                await Promise.all([loadFileList(), refreshActivity(), loadBlocks()]);
             } catch (err) {
                 console.error("Initialization failed:", err);
             }
@@ -234,7 +310,9 @@
                 const res = await fetch(ENDPOINTS.raw(path));
                 const text = await res.text();
 
-                content.innerHTML = marked.parse(text);
+                const hydratedBlockText = processBlocks(text);
+
+                content.innerHTML = marked.parse(hydratedBlockText);
                 content.style.opacity = '1';
                 content.style.transform = 'translateY(0)';
 

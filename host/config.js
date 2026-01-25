@@ -39,7 +39,7 @@ const CONFIG = {
     // Footer Info
     footer: {
         creator: "Veer Bajaj",
-        organization: "Kiwi Docs",
+        organization: "Kiwi Docs", // If none use Kiwi Docs
         version: "Kiwi Docs v2.1.0"
     }
 };
