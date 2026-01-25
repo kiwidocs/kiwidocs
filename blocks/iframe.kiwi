@@ -1,6 +1,6 @@
 ---
 name: Iframe
-trigger: @iframe
+trigger: iframe
 isMultiLine: false
 ---
 <iframe src="{src}" width="{width|100%}" height="{height|400px}" style="border:none; border-radius: 8px; background: #eee;" loading="lazy"></iframe>

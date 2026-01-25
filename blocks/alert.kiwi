@@ -1,6 +1,6 @@
 ---
 name: Alert
-trigger: @alert
+trigger: alert
 isMultiLine: true
 ---
 <div style="padding: 1rem; background: rgba(88, 166, 255, 0.1); border-left: 4px solid var(--accent-primary, #58a6ff); border-radius: 8px; margin: 1.5rem 0; color: white;">

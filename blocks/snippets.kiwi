@@ -1,33 +1,30 @@
 ---
 name: Snippets
-trigger: @snippets-per-type
+trigger: snippets-per-type
 isMultiLine: true
 ---
 <script>
 (args, body) => {
   const snippets = {};
   
-  // Split by @@ that appears at the start of a line
-  // We add a virtual @@ to the start to catch the first language easily
-  const normalizedBody = "@@" + body.trim();
+  // 1. Handle content that might be on the same line as the trigger
+  // 2. Ensure we split correctly by @@ while preserving the first language
+  const normalizedBody = body.trim().startsWith('@@') ? body.trim() : '@@' + body.trim();
   const parts = normalizedBody.split(/\n@@|@@/);
   
   parts.forEach(part => {
     const trimmed = part.trim();
     if (!trimmed) return;
-    
     const colonIndex = trimmed.indexOf(':');
     if (colonIndex === -1) return;
     
     const lang = trimmed.substring(0, colonIndex).trim();
     const code = trimmed.substring(colonIndex + 1).trim();
     
+    // Escape HTML to prevent code from rendering as actual elements
     const escapedCode = code
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;").replace(/'/g, "&#039;");
       
     snippets[lang] = escapedCode;
   });
@@ -35,9 +32,9 @@ isMultiLine: true
   const langs = Object.keys(snippets);
   if (langs.length === 0) return `<div style="color:red">No snippets found.</div>`;
 
-  const id = 'snippets-' + Math.random().toString(36).substr(2, 9);
+  const id = 'kiwi-snip-' + Math.random().toString(36).substr(2, 5);
   
-  let buttons = langs.map((lang, i) => 
+  const buttons = langs.map((lang, i) => 
     `<button class="tab-btn ${i === 0 ? 'active' : ''}" 
              onclick="const p=this.closest('.snippet-tabs'); p.dataset.active='${lang}'; p.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active')); this.classList.add('active');">${lang}</button>`
   ).join('');
@@ -53,12 +50,13 @@ isMultiLine: true
     `).join('')}
   </div>
   <style>
-    .snippet-tabs { border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; margin: 1.5rem 0; background: rgba(30,30,35,0.5); overflow: hidden; font-family: sans-serif; }
-    .tab-header { display: flex; background: rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.1); }
-    .tab-btn { padding: 10px 18px; border: none; background: none; cursor: pointer; color: #8b949e; font-size: 0.8rem; transition: all 0.2s; border-bottom: 2px solid transparent; }
-    .tab-btn.active { color: #58a6ff; border-bottom-color: #58a6ff; background: rgba(88,166,255,0.05); }
+    .snippet-tabs { border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; margin: 1rem 0; background: #0d1117; overflow: hidden; }
+    .tab-header { display: flex; background: #161b22; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .tab-btn { padding: 10px 16px; border: none; background: none; cursor: pointer; color: #8b949e; font-size: 13px; font-weight: 500; border-bottom: 2px solid transparent; }
+    .tab-btn.active { color: #58a6ff; border-bottom-color: #58a6ff; background: rgba(88, 166, 255, 0.05); }
     .tab-content-wrapper { display: none; padding: 1rem; overflow-x: auto; }
     ${langs.map(l => `.snippet-tabs[data-active="${l}"] .tab-content-wrapper[data-lang="${l}"] { display: block !important; }`).join('')}
+    pre { margin: 0; font-family: ui-monospace, monospace; font-size: 13px; color: #e6edf3; }
   </style>
 </div>`.trim();
 }

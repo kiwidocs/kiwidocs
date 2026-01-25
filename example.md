@@ -1,6 +1,7 @@
 # 🧪 Kiwi Building Blocks Showcase
 
-@typing(lines="Welcome+to+the+Kiwi+Showcase;Exploring+Building+Blocks;Modern+Documentation+Simplified", color="00BCD4")
+p
++++ typing(lines="Welcome+to+the+Kiwi+Showcase;Exploring+Building+Blocks;Modern+Documentation+Simplified", color="00BCD4")
 
 Kiwi allows you to mix standard Markdown with dynamic elements. Here is how you can use the core library.
 
@@ -9,40 +10,43 @@ Kiwi allows you to mix standard Markdown with dynamic elements. Here is how you 
 ## 📢 Alerts
 Alerts are perfect for highlighting important information. They support custom titles and bodies.
 
-@alert(title="Pro Tip")
-You can use Markdown inside your alerts too! The system handles it seamlessly.
++++ alert(title="Pro Tip")
+You can use **Markdown** inside your alerts too! The system handles it seamlessly.
++++
 
-@alert(title="Warning", color="#ff7b72")
++++ alert(title="Warning", color="#ff7b72")
 Always double check your triggers before publishing to production.
++++
 
 ---
 
 ## 💻 Multi-Language Code Snippets
-The `@snippets-per-type` block is ideal for developers. It creates an interactive, tabbed interface.
+The `snippets-per-type` block is ideal for developers. It creates an interactive, tabbed interface.
 
-### Example:
-
-@snippets-per-type
-python:
-def hello():
-    print("This is Python")
++++ snippets-per-type
+@@python:
+def hello_kiwi():
+    print("Welcome to the modern docs!")
+    return True
 
 @@javascript:
-function hello() {
-    console.log("This is JS");
+function helloKiwi() {
+  console.log("Welcome to the modern docs!");
+  return true;
 }
 
 @@rust:
 fn main() {
-    println!("This is Rust");
+    println!("Welcome to the modern docs!");
 }
++++
 
 ---
 
 ## 🖼️ Embedded Content (Iframes)
 Easily embed external sites, demos, or videos.
 
-@iframe(src="https://example.com", height="300px")
++++ iframe(src="https://example.com", height="300px")
 
 ---
 

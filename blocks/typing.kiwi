@@ -1,6 +1,6 @@
 ---
 name: Typing SVG
-trigger: @typing
+trigger: typing
 isMultiLine: false
 ---
 <div style="text-align: center; margin: 2rem 0;">

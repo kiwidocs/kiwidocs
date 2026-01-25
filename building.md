@@ -4,50 +4,48 @@ Kiwi Docs isn't just for static text. It supports **Building Blocks** — powerf
 
 ## 🚀 How to Write Your Markdown!
 
-Adding dynamic content to your pages is as simple as writing a trigger. There are two types of blocks:
+Adding dynamic content to your pages is simple. We use the `+++` syntax, which is clear and robust.
 
 ### 1. Single-Line Blocks
-Use these for components that only need basic settings.
-- **Syntax:** `@block-name(argument="value")`
-- **Example:** `@iframe(src="...", height="300px")`
+Use these for components like iframes or animations.
+- **Syntax:** `+++ blockName(arguments)`
+- **Example:** `+++ typing(lines="Hello World")`
 
 ### 2. Multi-Line Blocks
-Use these for components that wrap around content or code.
+Use these for components that wrap around content or code. Start with `+++ name` and end with `+++`.
 - **Syntax:**
   ```markdown
-  @block-name
+  +++ blockName
   ... content here ...
+  +++
   ```
-- **Example:** The `@snippets-per-type` block uses this to hold your code.
+- **Example:** The `snippets-per-type` block uses this to hold your code.
 
 ---
 
 ## 📦 Core Blocks Portfolio
 
-### 🧩 Snippets Per Type (`@snippets-per-type`)
-The ultimate way to show multi-language code. It automatically creates a beautiful tabbed interface for your snippets.
+### 🧩 Snippets Per Type (`snippets-per-type`)
+The ultimate way to show multi-language code.
 
 **How to use it:**
-Use the `@snippets-per-type` trigger, followed by `@@` sections for each language.
 
 ```markdown
-@snippets-per-type
++++ snippets-per-type
 @@python:
 print("Hello from Kiwi!")
 
 @@javascript:
 console.log("Hello from Kiwi!");
-
-@@bash:
-echo "Hello from Kiwi!"
++++
 ```
 
-### 🖼️ Iframe (`@iframe`)
+### 🖼️ Iframe (`iframe`)
 Embed websites, demos, or videos directly into your docs.
 
 **How to use it:**
 ```markdown
-@iframe(src="https://example.com", height="400px")
++++ iframe(src="https://example.com", height="400px")
 ```
 
 ---
