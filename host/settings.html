@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #090b0f;
+            --accent-primary: #58a6ff;
+            --text-main: #e6edf3;
+            --text-dim: #8b949e;
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            margin: 0;
+            padding: 24px;
+            background: transparent;
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .settings-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 32px;
+        }
+
+        .settings-header h2 {
+            font-family: 'Outfit', sans-serif;
+            margin: 0;
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, #fff 0%, #8b949e 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .section-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            letter-spacing: 0.1em;
+            margin: 24px 0 12px;
+            font-weight: 700;
+        }
+
+        .settings-group {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .settings-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            border-bottom: 1px solid var(--glass-border);
+            transition: background 0.2s ease;
+        }
+
+        .settings-row:last-child {
+            border-bottom: none;
+        }
+
+        .settings-row:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .row-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .row-label {
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .row-desc {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+        }
+
+        input[type="password"],
+        input[type="text"] {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            color: white;
+            padding: 8px 12px;
+            font-family: inherit;
+            width: 200px;
+            transition: all 0.2s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.2);
+        }
+
+        .toggle-container {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+
+        .toggle-container input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.1);
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: var(--accent-primary);
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(20px);
+        }
+
+        .footer-btns {
+            margin-top: 40px;
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        button.btn {
+            padding: 10px 24px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+        }
+
+        .btn-primary {
+            background: var(--accent-primary);
+            color: #0d1117;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-main);
+            border: 1px solid var(--glass-border);
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.1);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="settings-header">
+        <img src="svg/settings-fill.svg" width="28" height="28">
+        <h2>App Settings</h2>
+    </div>
+
+    <div id="dev-section" style="display: none;">
+        <div class="section-title">Developer</div>
+        <div class="settings-group">
+            <div class="settings-row">
+                <div class="row-info">
+                    <div class="row-label">GitHub API Token</div>
+                    <div class="row-desc">Required for private repos or rate limits</div>
+                </div>
+                <input type="password" id="token-input" placeholder="github_pat_...">
+            </div>
+            <div class="settings-row">
+                <div class="row-info">
+                    <div class="row-label">Local Development Mode</div>
+                    <div class="row-desc">Load files from local server (../)</div>
+                </div>
+                <label class="toggle-container">
+                    <input type="checkbox" id="local-mode-toggle">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-title">Display</div>
+    <div class="settings-group">
+        <div class="settings-row">
+            <div class="row-info">
+                <div class="row-label">High Refresh Animations</div>
+                <div class="row-desc">Enable smooth transition effects</div>
+            </div>
+            <label class="toggle-container">
+                <input type="checkbox" checked disabled>
+                <span class="slider"></span>
+            </label>
+        </div>
+    </div>
+
+    <div class="footer-btns">
+        <button class="btn btn-secondary" onclick="window.parent.closeModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="save()">Save Settings</button>
+    </div>
+
+    <script>
+        // Load initial state from parent safely
+        const Settings = window.parent.Settings;
+
+        if (Settings) {
+            document.getElementById('token-input').value = Settings.token || '';
+            document.getElementById('local-mode-toggle').checked = !!Settings.localMode;
+        } else {
+            console.error("Kiwi Settings: Parent window 'Settings' object not found.");
+        }
+
+        const devSection = document.getElementById('dev-section');
+
+        // Check if dev mode was already triggered in parent
+        if (window.parent.devModeActive || window.parent.pendingDevMode) {
+            devSection.style.display = 'block';
+            window.parent.devModeActive = true;
+            window.parent.pendingDevMode = false;
+        }
+
+        window.toggleDevMode = function (force) {
+            if (force === true) {
+                devSection.style.display = 'block';
+            } else {
+                devSection.style.display = devSection.style.display === 'none' ? 'block' : 'none';
+            }
+            window.parent.devModeActive = devSection.style.display === 'block';
+        };
+
+        function save() {
+            if (!Settings) return;
+            const token = document.getElementById('token-input').value.trim();
+            const localMode = document.getElementById('local-mode-toggle').checked;
+            Settings.save(token, localMode);
+        }
+    </script>
+</body>
+
+</html>

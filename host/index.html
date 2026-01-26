@@ -58,13 +58,17 @@
         </div>
         <div class="nav-group-title">Actions</div>
         <div class="nav-link" onclick="sharePage()">
-            <img src="svg/share.svg" width="16" height="16" style="opacity: 0.8;"> Share Page
+            <img src="svg/share.svg" data-base="svg/share" width="16" height="16" style="opacity: 0.8;"> Share Page
         </div>
         <div class="nav-link" onclick="editPage()">
-            <img src="svg/edit.svg" width="16" height="16" style="opacity: 0.8;"> Edit in GitHub
+            <img src="svg/edit.svg" data-base="svg/edit" width="16" height="16" style="opacity: 0.8;"> Edit in GitHub
         </div>
         <div class="nav-link" onclick="addPageModal()">
-            <img src="svg/add.svg" width="16" height="16" style="opacity: 0.8;"> Add New Page
+            <img src="svg/add.svg" data-base="svg/add" width="16" height="16" style="opacity: 0.8;"> Add New Page
+        </div>
+        <div class="nav-group-title">Configuration</div>
+        <div class="nav-link" onclick="openSettings()">
+            <img src="svg/settings.svg" data-base="svg/settings" width="16" height="16" style="opacity: 0.8;"> Settings
         </div>
         <div class="nav-footer" id="sidebar-footer">
 
@@ -109,7 +113,7 @@
     </aside>
 
     <div id="modal-overlay" class="modal-overlay">
-        <div class="modal">
+        <div class="modal" id="add-page-modal">
             <h3 id="modal-title">Add New Page</h3>
             <input type="text" id="page-name" placeholder="Page name (e.g. Getting Started)">
             <textarea id="page-content" placeholder="Page content (Markdown supported)"></textarea>
@@ -117,6 +121,12 @@
                 <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
                 <button class="btn btn-primary" onclick="submitAddPage()">Create on GitHub</button>
             </div>
+        </div>
+
+        <div class="modal" id="settings-modal"
+            style="display: none; max-width: 600px; padding: 0; overflow: hidden; border: none; background: rgba(9, 11, 15, 0.95); backdrop-filter: blur(30px);">
+            <iframe id="settings-frame" src="about:blank"
+                style="width: 100%; height: 500px; border: none; display: block;"></iframe>
         </div>
     </div>
 
@@ -127,13 +137,63 @@
             currentPath: 'README.md' // Fallback
         };
 
+        const Settings = {
+            token: localStorage.getItem('kiwi_token') || '',
+            localMode: localStorage.getItem('kiwi_local_mode') === 'true',
+            save: function (token, localMode) {
+                localStorage.setItem('kiwi_token', token);
+                localStorage.setItem('kiwi_local_mode', localMode);
+                location.reload();
+            }
+        };
+        window.Settings = Settings; // Explicitly global for iframe access
+
         const blockLib = new KiwiBlockLib(CONFIG);
 
         const ENDPOINTS = {
             contents: `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents?ref=${CONFIG.branch}`,
             commits: `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/commits?sha=${CONFIG.branch}&per_page=5`,
-            raw: (path) => `https://raw.githubusercontent.com/${CONFIG.owner}/${CONFIG.repo}/${CONFIG.branch}/${path}`
+            raw: (path) => Settings.localMode ? `../${path}` : `https://raw.githubusercontent.com/${CONFIG.owner}/${CONFIG.repo}/${CONFIG.branch}/${path}`
         };
+
+        // Dev Mode Trigger (type 'dev')
+        let info_keys = "";
+        window.devModeActive = false;
+        window.pendingDevMode = false;
+
+        window.addEventListener('keypress', (e) => {
+            info_keys += e.key;
+            if (info_keys.endsWith("dev")) {
+                window.devModeActive = true;
+                const frame = document.getElementById('settings-frame');
+                if (frame && frame.contentWindow && frame.contentWindow.toggleDevMode) {
+                    frame.contentWindow.toggleDevMode(true);
+                } else {
+                    window.pendingDevMode = true;
+                }
+                openSettings();
+                info_keys = "";
+            }
+        });
+
+        window.dev = function () {
+            openSettings();
+            showSubmenu('dev-submenu');
+        };
+
+        window.openSettings = function () {
+            document.getElementById('modal-overlay').style.display = 'flex';
+            document.getElementById('add-page-modal').style.display = 'none';
+            const settingsModal = document.getElementById('settings-modal');
+            settingsModal.style.display = 'block';
+            document.getElementById('settings-frame').src = 'settings.html';
+        };
+
+        function saveDevSettings() {
+            const token = document.getElementById('dev-token').value.trim();
+            const localMode = document.getElementById('dev-local-mode').checked;
+            Settings.save(token, localMode);
+        }
 
         // Initialize UI from CONFIG
         function applyBranding() {
@@ -168,7 +228,10 @@
         async function init() {
             applyBranding();
             try {
-                await Promise.all([loadFileList(), refreshActivity(), blockLib.init()]);
+                // Initialize blocks first to ensure they are registered before we try to render them
+                await blockLib.init();
+                // Then load the file list and activity
+                await Promise.all([loadFileList(), refreshActivity()]);
             } catch (err) {
                 console.error("Initialization failed:", err);
             }
@@ -177,7 +240,12 @@
         async function loadFileList() {
             const container = document.getElementById('page-list');
             try {
-                const res = await fetch(ENDPOINTS.contents);
+                const headers = {};
+                if (Settings.token) {
+                    headers['Authorization'] = `token ${Settings.token}`;
+                }
+
+                const res = await fetch(ENDPOINTS.contents, { headers });
                 if (!res.ok) throw new Error("Repo not found");
                 const items = await res.json();
                 const files = items.filter(i => i.name.endsWith('.md'));
@@ -192,7 +260,7 @@
                     const href = urlName.toLowerCase() === 'readme' ? './' : `?page=${urlName}`;
                     return `
                         <a class="nav-link" href="${href}" data-path="${file.path}" onclick="event.preventDefault(); loadFile('${file.path}', this)">
-                            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" style="opacity: 0.6"><path d="M3.75 2h3.5l3.5 3.5v8.75A1.75 1.75 0 019 16H3.75A1.75 1.75 0 012 14.25V3.75C2 2.784 2.784 2 3.75 2z"></path></svg>
+                            <img src="svg/doc.svg" data-base="svg/doc" width="16" height="16" style="opacity: 0.8;">
                             ${file.name.replace('.md', '')}
                         </a>
                     `;
@@ -316,7 +384,11 @@
             feed.innerHTML = `<div style="font-size: 0.8rem; padding: 12px 0; color: var(--text-dim);">Loading...</div>`;
             try {
                 const url = `https://api.github.com/repos/${CONFIG.owner}/${repoName}/commits?per_page=5`;
-                const res = await fetch(url);
+                const headers = {};
+                if (Settings.token) {
+                    headers['Authorization'] = `token ${Settings.token}`;
+                }
+                const res = await fetch(url, { headers });
                 if (!res.ok) throw new Error("Commits not found");
                 const commits = await res.json();
                 feed.innerHTML = commits.map(c => `
@@ -428,11 +500,33 @@
 
         function addPageModal() {
             document.getElementById('modal-overlay').style.display = 'flex';
+            document.getElementById('add-page-modal').style.display = 'block';
+            document.getElementById('dev-modal').style.display = 'none';
         }
 
         function closeModal() {
             document.getElementById('modal-overlay').style.display = 'none';
+            document.getElementById('settings-modal').style.display = 'none';
         }
+
+        // Icon Hover Effect Handlers
+        document.addEventListener('mouseover', (e) => {
+            const link = e.target.closest('.nav-link, #settings-trigger');
+            if (!link) return;
+            const img = link.querySelector('img[data-base]');
+            if (img) {
+                img.src = `${img.dataset.base}-fill.svg`;
+            }
+        });
+
+        document.addEventListener('mouseout', (e) => {
+            const link = e.target.closest('.nav-link, #settings-trigger');
+            if (!link) return;
+            const img = link.querySelector('img[data-base]');
+            if (img) {
+                img.src = `${img.dataset.base}.svg`;
+            }
+        });
 
         function submitAddPage() {
             const name = document.getElementById('page-name').value.trim();
