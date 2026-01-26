@@ -5,7 +5,10 @@ set -e
 exec < /dev/tty
 
 REPO_URL="https://github.com/kiwidocs/kiwidocs.git"
-DIR="kiwidocs"
+
+# Ask user for target directory relative to current directory
+read -rp "Enter target directory name for Kiwi Docs [kiwidocs]: " DIR
+DIR=${DIR:-kiwidocs}
 
 progress_bar () {
   local duration=$1
@@ -39,6 +42,7 @@ echo ""
 echo "No Node.js. No npm. Pure Bash."
 echo "================================================="
 echo ""
+read -p "Press Enter to continue, any other key to abort: " input; [ -n "$input" ] && { echo "Aborted."; exit 1; }; echo "Continuing..."
 
 # ---- dependency checks ----
 echo "🔍 Checking system requirements..."
@@ -57,20 +61,23 @@ echo ""
 echo "📥 Preparing repository..."
 sleep 0.5
 
-if [ -d "$DIR" ]; then
+TARGET_PATH="$(pwd)/$DIR"
+
+if [ -d "$TARGET_PATH" ]; then
   echo "  ⚠️ '$DIR' already exists, reusing it"
   progress_bar 1
 else
-  echo "  Cloning from $REPO_URL"
-  git clone "$REPO_URL" >/dev/null 2>&1 &
+  echo "  Cloning from $REPO_URL into '$DIR'"
+  git clone "$REPO_URL" "$DIR" >/dev/null 2>&1 &
   progress_bar 3
   wait
   echo "  ✔ Clone completed"
 fi
 
-cd "$DIR"
+cd "$TARGET_PATH"
 echo "📂 Working directory: $(pwd)"
 echo ""
+
 
 # ---- configuration ----
 echo "🛠 Preparing configuration wizard..."
@@ -79,6 +86,7 @@ echo ""
 
 echo "You can press Enter to accept the default value."
 echo ""
+read -p "Press Enter to continue, any other key to abort: " input; [ -n "$input" ] && { echo "Aborted."; exit 1; }; echo "Continuing..."
 
 read -rp "GitHub owner or organization [kiwidocs]: " OWNER
 OWNER=${OWNER:-kiwidocs}
