@@ -4,7 +4,7 @@ set -e
 REPO_URL="https://github.com/kiwidocs/kiwidocs.git"
 DIR="kiwidocs"
 
-echo "🥝 Kiwi Docs Installer"
+echo "🥝 Kiwi Docs Installer (v1.0.0)"
 echo "---------------------"
 
 # --- check git ---
