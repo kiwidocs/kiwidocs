@@ -9,7 +9,7 @@ Fork this repository to create your own documentation portal in minutes.
 
 * **Zero Build Step** – Runs directly from GitHub Pages
 * **GitHub API Integration** – Automatically fetches Markdown files
-* **Easy Customization** – Configure via `config.js` and `css/theme.css`
+* **Easy Customization** – Configure via `host/config.js` and `css/theme.css`
 * **Responsive Design** – Mobile-friendly layout
 * **Activity Feed** – Displays recent commits from selected repositories
 
@@ -21,50 +21,18 @@ Fork this repository to create your own documentation portal in minutes.
 
 You have three options:
 
-<!-- @snippets-per-type(CLI="gh repo fork kiwidocs/kiwidocs --clone" GUI="Use GitHub's web UI or CLI:" Installer="curl -fsSL -o install.sh https://raw.githubusercontent.com/kiwidocs/kiwidocs/main/install.sh\nbash install.sh") -->
+<!-- @snippets-per-type(CLI="gh repo fork kiwidocs/kiwidocs --clone" GUI="Use GitHub's web UI or CLI:" Installer="curl -fsSL -o install.sh https://raw.githubusercontent.com/kiwidocs/kiwidocs/main/install.sh && bash install.sh") -->
 
-#### Option A — Fork (recommended)
-
-Use GitHub’s web UI or CLI:
-
-```bash
-gh repo fork kiwidocs/kiwidocs --clone
-```
-
-Then enable **GitHub Pages**:
-
-* Settings → Pages
-* Source: `main` branch / root
-
----
-
-#### Option B — Clone Manually
-
-```bash
-git clone https://github.com/kiwidocs/kiwidocs.git
-cd kiwidocs
-```
-
----
-
-#### Option C — One-Line Installer (guided setup)
-
-This clones the repo **and walks you through configuration**:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/kiwidocs/kiwidocs/main/install.sh | bash
-```
 
 > **Requirements:** `git`, `node`, and `bash`
 > On macOS: `brew install node git`
 
 ---
 
-### 2. Configuration (`config.js`)
+### 2. Configuration (`host/config.js`)
 
-If you used the installer, this file is already generated for you.
-
-Otherwise, open `config.js` and edit:
+If you used the installer, this is already done.
+Otherwise, open `host/config.js` and edit:
 
 ```js
 const CONFIG = {

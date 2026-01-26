@@ -125,7 +125,7 @@ echo ""
 echo "✍️  Writing config.js..."
 progress_bar 2
 
-cat > config.js <<EOF
+cat > host/config.js <<EOF
 /*
   Copyright (C) 2026 - Kiwi Docs
   GNU General Public License v3

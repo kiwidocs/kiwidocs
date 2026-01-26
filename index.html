@@ -2,31 +2,117 @@
 <html>
 
 <head>
-    <title>Redirecting...</title>
+    <script src="host/config.js"></script>
+    <title>Kiwi Docs | Loading...</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="icon" type="image/x-icon" href="host/favicon.ico">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            background-color: #090b0f;
+            color: #e6edf3;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            text-align: center;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            background-size: cover;
+            background-position: center;
+            border-radius: 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2rem;
+            margin: 0 0 8px;
+        }
+
+        p {
+            color: #8b949e;
+            font-size: 1.1rem;
+        }
+
+        .loader {
+            width: 40px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            margin-top: 32px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .loader::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 40%;
+            height: 100%;
+            background: #58a6ff;
+            animation: loading 1.5s infinite ease-in-out;
+        }
+
+        @keyframes loading {
+            0% {
+                left: -40%;
+            }
+
+            100% {
+                left: 100%;
+            }
+        }
+
+        a {
+            color: #58a6ff;
+            text-decoration: none;
+        }
+    </style>
     <script>
-        // Get the current URL information
-        const currentPath = window.location.pathname;
-        const currentOrigin = window.location.origin;
+        window.addEventListener('load', () => {
+            if (typeof CONFIG !== 'undefined') {
+                document.title = CONFIG.branding.title || "Kiwi Docs";
+                if (CONFIG.branding.logo) {
+                    const logoEl = document.getElementById('logo');
+                    logoEl.style.backgroundImage = `url('${CONFIG.branding.logo}')`;
+                }
+                document.getElementById('title').textContent = CONFIG.branding.shortTitle || "Kiwi Docs";
+            }
 
-        // Construct the new URL: 
-        // If path is '/', it becomes '/host'
-        // If path is '/k', it becomes '/k/host'
+            const currentPath = window.location.pathname;
+            const currentOrigin = window.location.origin;
+            const cleanPath = currentPath.endsWith('/') ? currentPath.slice(0, -1) : currentPath;
+            const targetURL = currentOrigin + cleanPath + '/host' + window.location.search + window.location.hash;
 
-        // We remove any trailing slash from the current path to prevent '//host'
-        const cleanPath = currentPath.endsWith('/') ? currentPath.slice(0, -1) : currentPath;
-        const targetURL = currentOrigin + cleanPath + '/host';
-
-        // Perform the redirect
-        window.location.replace(targetURL);
+            // Perform the redirect after a short delay for smooth feel
+            setTimeout(() => {
+                window.location.replace(targetURL);
+            }, 800);
+        });
     </script>
 </head>
 
 <body>
-    <p>Redirecting you to <a id="link" href="#">the host page</a>...</p>
-    <script>
-        // Fallback: update the link text just in case JS takes a second
-        document.getElementById('link').href = window.location.origin + window.location.pathname + '/host';
-    </script>
+    <div id="logo" class="logo"></div>
+    <h1 id="title">Kiwi Docs</h1>
+    <p>Preparing your workspace...</p>
+    <div class="loader"></div>
+    <p style="font-size: 0.8rem; margin-top: 40px;">
+        Not redirecting? <a id="link" href="host/">Click here</a>
+    </p>
 </body>
 
 </html>
