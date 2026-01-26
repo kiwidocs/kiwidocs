@@ -21,7 +21,7 @@ Fork this repository to create your own documentation portal in minutes.
 
 You have three options:
 
-<!-- @snippets-per-type(CLI="gh repo fork kiwidocs/kiwidocs --clone", GUI="Use GitHub’s web UI or CLI:", Installer="curl -fsSL https://raw.githubusercontent.com/kiwidocs/kiwidocs/main/install.sh | bash") -->
+<!-- @snippets-per-type(CLI="gh repo fork kiwidocs/kiwidocs --clone" GUI="Use GitHub's web UI or CLI:" Installer="curl -fsSL -o install.sh https://raw.githubusercontent.com/kiwidocs/kiwidocs/main/install.sh\nbash install.sh") -->
 
 #### Option A — Fork (recommended)
 
