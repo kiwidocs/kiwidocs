@@ -27,6 +27,11 @@ const CONFIG = {
     // Default Branch (main/master)
     branch: "main",
 
+    // ── Ask the Kiwi (AI Chat) ──────────────────────────────────────
+    // Set this to your deployed Cloudflare Worker URL to enable the chat widget.
+    // Leave empty or remove to disable the widget.
+    askKiwiEndpoint: "https://kiwiback.veerbajaj11.workers.dev",
+
     // Branding
     branding: {
         title: "Kiwi Docs", // Window title
@@ -40,7 +45,18 @@ const CONFIG = {
     footer: {
         creator: "Veer Bajaj",
         organization: "Kiwi Docs", // If none use Kiwi Docs
-        version: "Kiwi Docs v2.1.0"
+        version: "Kiwi Docs v2.2.0"
+    },
+
+    // Firebase Configuration
+    firebaseConfig: {
+        apiKey: "AIzaSyA389bfG_hGa5l2ckz9Ak3al_amtxvU53c",
+        authDomain: "vibroim-b5dc3.firebaseapp.com",
+        projectId: "vibroim-b5dc3",
+        storageBucket: "vibroim-b5dc3.firebasestorage.app",
+        messagingSenderId: "733742930053",
+        appId: "1:733742930053:web:90437a2f6ac8b9cf1231ec",
+        measurementId: "G-EEW2LL3PJR"
     }
 };
 
