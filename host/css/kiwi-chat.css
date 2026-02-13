@@ -113,12 +113,6 @@
     margin: 0;
 }
 
-.kiwi-chat-header-actions {
-    display: flex;
-    gap: 8px;
-}
-
-.kiwi-chat-header-btn,
 .kiwi-chat-header-close {
     width: 28px;
     height: 28px;
@@ -134,7 +128,6 @@
     transition: all 0.2s;
 }
 
-.kiwi-chat-header-btn:hover,
 .kiwi-chat-header-close:hover {
     background: rgba(255, 255, 255, 0.08);
     color: #e6edf3;
