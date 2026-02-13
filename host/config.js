@@ -14,6 +14,16 @@
         You should have received a copy of the GNU General Public License
         along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+
+// Polyfill crypto.randomUUID for non-secure contexts (e.g., HTTP on [::] or IP)
+if (typeof crypto !== 'undefined' && !crypto.randomUUID) {
+    crypto.randomUUID = function () {
+        return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, c =>
+            (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+        );
+    };
+}
+
 const CONFIG = {
     // Your GitHub Organization or Username
     owner: "kiwidocs",
