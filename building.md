@@ -1,9 +1,9 @@
 # ✨ Building with Kiwi
 
 Kiwi Docs isn't just for static text. It supports **Building Blocks** — powerful, dynamic components that you can drop directly into your Markdown files to create rich, interactive documentation.
-
+<!-- @alert(title="Warning" color="#ff7b72" body="Make sure to put the block in a subfolder of the project root called blocks!") -->
 ## 🚀 How to Write Your Markdown!
-d
+
 Adding dynamic content to your pages is clean and invisible to standard parsers. We use **HTML Comments** to define blocks.
 
 ### The Syntax

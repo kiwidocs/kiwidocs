@@ -2,7 +2,16 @@
  * Kiwi Docs MCP Server + Chat API — Cloudflare Worker
  */
 
-import * as jose from 'jose';
+
+
+export interface RepoConfig {
+  owner?: string;
+  repo?: string;
+  branch?: string;
+  token?: string;
+  extensions?: string[];
+  ignorePaths?: string[];
+}
 
 export interface Env {
   GEMINI_API_KEY: string;
@@ -51,20 +60,7 @@ interface ChatSession {
 
 // ── Auth helper ──────────────────────────────────────────────────────
 
-const JWKS = jose.createRemoteJWKSet(new URL('https://www.googleapis.com/robot/v1/metadata/jwk/securetoken@system.gserviceaccount.com'));
 
-async function verifyFirebaseToken(token: string, projectId: string) {
-  try {
-    const { payload } = await jose.jwtVerify(token, JWKS, {
-      issuer: `https://securetoken.google.com/${projectId}`,
-      audience: projectId,
-    });
-    return payload;
-  } catch (err) {
-    console.error('Auth verification failed:', err);
-    return null;
-  }
-}
 
 // ── CORS helper ──────────────────────────────────────────────────────
 
@@ -89,14 +85,20 @@ function corsHeaders(request: Request, env: Env): Record<string, string> {
 
 // ── GitHub helpers ───────────────────────────────────────────────────
 
-async function fetchRepoMarkdownFiles(env: Env): Promise<DocFile[]> {
-  const owner = env.GITHUB_OWNER || "kiwidocs";
-  const repo = env.GITHUB_REPO || "kiwidocs";
-  const branch = env.GITHUB_BRANCH || "main";
+async function fetchRepoFiles(env: Env, config: RepoConfig = {}): Promise<DocFile[]> {
+  const owner = config.owner || env.GITHUB_OWNER || "kiwidocs";
+  const repo = config.repo || env.GITHUB_REPO || "kiwidocs";
+  const branch = config.branch || env.GITHUB_BRANCH || "main";
+  const token = config.token || env.GITHUB_TOKEN;
+  const extensions = config.extensions || [".md", ".TBD", ".kiwi"];
+
+  // Cache key should include repo details and extensions hash
+  const extHash = extensions.sort().join(",");
+  const cacheKey = `docs_bundle:${owner}:${repo}:${branch}:${extHash}`;
 
   if (env.DOCS_CACHE) {
     try {
-      const cached = await env.DOCS_CACHE.get("docs_bundle", "json");
+      const cached = await env.DOCS_CACHE.get(cacheKey, "json");
       if (cached) return cached as DocFile[];
     } catch { /* cache miss */ }
   }
@@ -105,8 +107,8 @@ async function fetchRepoMarkdownFiles(env: Env): Promise<DocFile[]> {
     Accept: "application/vnd.github.v3+json",
     "User-Agent": "kiwi-mcp-worker",
   };
-  if (env.GITHUB_TOKEN) {
-    headers.Authorization = `token ${env.GITHUB_TOKEN}`;
+  if (token) {
+    headers.Authorization = `token ${token}`;
   }
 
   const treeUrl = `https://api.github.com/repos/${owner}/${repo}/git/trees/${branch}?recursive=1`;
@@ -114,25 +116,19 @@ async function fetchRepoMarkdownFiles(env: Env): Promise<DocFile[]> {
   if (!treeRes.ok) throw new Error(`GitHub tree fetch failed: ${treeRes.status}`);
 
   const treeData = (await treeRes.json()) as { tree: { path: string; type: string }[] };
-  const mdPaths = treeData.tree
-    .filter((f) => f.type === "blob" && f.path.endsWith(".md"))
-    .map((f) => f.path);
-
-  const files: DocFile[] = await Promise.all(
-    mdPaths.map(async (path) => {
-      const rawUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${path}`;
-      const res = await fetch(rawUrl, { headers: { "User-Agent": "kiwi-mcp-worker" } });
-      const content = res.ok ? await res.text() : "";
-      return { name: path.replace(/\.md$/, ""), path, content };
+  const targetPaths = treeData.tree
+    .filter((f) => {
+      if (f.type !== "blob") return false;
+      if (!extensions.some(ext => f.path.endsWith(ext))) return false;
+      if (config.ignorePaths && Array.isArray(config.ignorePaths)) {
+        return !config.ignorePaths.some(pattern => new RegExp(pattern).test(f.path));
+      }
+      return true;
     })
-  );
-
-  const extraPaths = treeData.tree
-    .filter((f) => f.type === "blob" && (f.path.endsWith(".TBD") || f.path.endsWith(".kiwi")))
     .map((f) => f.path);
 
-  const extraFiles: DocFile[] = await Promise.all(
-    extraPaths.map(async (path) => {
+  const allFiles: DocFile[] = await Promise.all(
+    targetPaths.map(async (path) => {
       const rawUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${path}`;
       const res = await fetch(rawUrl, { headers: { "User-Agent": "kiwi-mcp-worker" } });
       const content = res.ok ? await res.text() : "";
@@ -140,11 +136,9 @@ async function fetchRepoMarkdownFiles(env: Env): Promise<DocFile[]> {
     })
   );
 
-  const allFiles = [...files, ...extraFiles];
-
   if (env.DOCS_CACHE) {
     try {
-      await env.DOCS_CACHE.put("docs_bundle", JSON.stringify(allFiles), { expirationTtl: 300 });
+      await env.DOCS_CACHE.put(cacheKey, JSON.stringify(allFiles), { expirationTtl: 300 });
     } catch { /* cache write failed */ }
   }
 
@@ -158,7 +152,7 @@ async function askGemini(
   systemPrompt: string,
   messages: { role: string; text: string }[]
 ): Promise<string> {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`;
 
   const contents = messages.map((m) => ({
     role: m.role === "assistant" ? "model" : "user",
@@ -247,24 +241,22 @@ async function saveChatSession(env: Env, uid: string, sessionId: string, message
 
 async function handleAPIAsk(request: Request, env: Env): Promise<Response> {
   const cors = corsHeaders(request, env);
-  const authHeader = request.headers.get("Authorization");
-  const token = authHeader?.startsWith("Bearer ") ? authHeader.substring(7) : null;
-
-  const payload = token ? await verifyFirebaseToken(token, env.FIREBASE_PROJECT_ID) : null;
-  const uid = payload?.sub as string;
+  // No auth for local
+  const uid = "local";
 
   try {
     const body = (await request.json()) as {
       question: string;
       sessionId?: string;
       history?: ChatMessage[];
+      config?: RepoConfig;
     };
 
     if (!body.question?.trim()) {
       return new Response(JSON.stringify({ error: "Missing question" }), { status: 400, headers: cors });
     }
 
-    const docs = await fetchRepoMarkdownFiles(env);
+    const docs = await fetchRepoFiles(env, body.config);
     const systemPrompt = buildSystemPrompt(docs);
 
     const messages: { role: string; text: string }[] = [];
@@ -289,15 +281,8 @@ async function handleAPIAsk(request: Request, env: Env): Promise<Response> {
 
 async function handleAPIHistory(request: Request, env: Env): Promise<Response> {
   const cors = corsHeaders(request, env);
-  const authHeader = request.headers.get("Authorization");
-  const token = authHeader?.startsWith("Bearer ") ? authHeader.substring(7) : null;
-
-  if (!token) return new Response("Unauthorized", { status: 401, headers: cors });
-
-  const payload = await verifyFirebaseToken(token, env.FIREBASE_PROJECT_ID);
-  if (!payload) return new Response("Invalid token", { status: 401, headers: cors });
-
-  const uid = payload.sub as string;
+  // No auth for local
+  const uid = "local";
   const url = new URL(request.url);
   const sessionId = url.pathname.split("/").pop();
 
@@ -335,7 +320,15 @@ export default {
     }
 
     if (url.pathname === "/api/docs") {
-      const docs = await fetchRepoMarkdownFiles(env);
+      const config: RepoConfig = {
+        owner: url.searchParams.get("owner") || undefined,
+        repo: url.searchParams.get("repo") || undefined,
+        branch: url.searchParams.get("branch") || undefined,
+        token: url.searchParams.get("token") || undefined,
+        extensions: url.searchParams.get("extensions")?.split(",") || undefined,
+        ignorePaths: url.searchParams.get("ignorePaths")?.split(",") || undefined,
+      };
+      const docs = await fetchRepoFiles(env, config);
       return new Response(JSON.stringify({ docs: docs.map(d => ({ name: d.name, path: d.path })) }), { headers: cors });
     }
 

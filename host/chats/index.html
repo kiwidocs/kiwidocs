@@ -227,7 +227,7 @@
         </div>
 
         <div id="sessions-container">
-            <div class="loader">Sign in to view your chat history.</div>
+            <div class="loader">Loading your chat history...</div>
         </div>
     </div>
 
@@ -241,46 +241,21 @@
         </div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signInWithPopup, GithubAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
-
-        const app = initializeApp(CONFIG.firebaseConfig);
-        const auth = getAuth(app);
-        let currentUser = null;
-
+    <script>
         const endpoint = CONFIG.askKiwiEndpoint.replace(/\/$/, '');
 
-        onAuthStateChanged(auth, (user) => {
-            currentUser = user;
+        // Load sessions on startup
+        document.addEventListener('DOMContentLoaded', () => {
             updateAuthUI();
-            if (user) {
-                if (user.isAnonymous) {
-                    document.getElementById('sessions-container').innerHTML = `<div class="loader">Chat history is only available for GitHub accounts. Guests' chats are saved but not listable here.</div>`;
-                } else {
-                    loadSessions();
-                }
-            } else {
-                document.getElementById('sessions-container').innerHTML = `<div class="loader">Please sign in with GitHub to view your history.</div>`;
-            }
+            loadSessions();
         });
 
         function updateAuthUI() {
             const userInfo = document.getElementById('user-info');
             const authActions = document.getElementById('auth-actions');
 
-            if (currentUser) {
-                userInfo.textContent = `Signed in as ${currentUser.displayName || currentUser.email || 'Guest'}`;
-                authActions.innerHTML = `<button class="btn btn-primary" id="btn-logout" style="background: rgba(255,255,255,0.05); color: white;">Logout</button>`;
-                document.getElementById('btn-logout').onclick = () => signOut(auth);
-            } else {
-                userInfo.textContent = "Not signed in";
-                authActions.innerHTML = `<button class="btn btn-primary" id="btn-login">Login with GitHub</button>`;
-                document.getElementById('btn-login').onclick = () => {
-                    const provider = new GithubAuthProvider();
-                    signInWithPopup(auth, provider);
-                };
-            }
+            userInfo.textContent = `Local Mode (No Auth)`;
+            authActions.innerHTML = '';
         }
 
         async function loadSessions() {
@@ -288,10 +263,7 @@
             container.innerHTML = '<div class="loader">Fetching your sessions...</div>';
 
             try {
-                const token = await currentUser.getIdToken();
-                const res = await fetch(`${endpoint}/api/history`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
+                const res = await fetch(`${endpoint}/api/history`);
 
                 if (!res.ok) throw new Error("Failed to fetch sessions");
 
@@ -335,10 +307,7 @@
             msgContainer.innerHTML = '<div class="loader">Loading conversation...</div>';
 
             try {
-                const token = await currentUser.getIdToken();
-                const res = await fetch(`${endpoint}/api/history/${sessionId}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
+                const res = await fetch(`${endpoint}/api/history/${sessionId}`);
 
                 if (!res.ok) throw new Error("Could not load session");
 

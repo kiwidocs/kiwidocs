@@ -48,8 +48,7 @@
 
 
 </head>
-<script type="module" src="firebase-init.js"></script>
-<script src="kiwi-chat.js"></script>
+<script src="kiwi-chat.js?v=2"></script>
 
 <body>
     <nav id="sidebar">
@@ -254,7 +253,13 @@
                 const res = await fetch(ENDPOINTS.contents, { headers });
                 if (!res.ok) throw new Error("Repo not found");
                 const items = await res.json();
-                const files = items.filter(i => i.name.endsWith('.md'));
+                const files = items.filter(i => {
+                    if (!i.name.endsWith('.md')) return false;
+                    if (CONFIG.ignorePaths && Array.isArray(CONFIG.ignorePaths)) {
+                        return !CONFIG.ignorePaths.some(pattern => new RegExp(pattern).test(i.name));
+                    }
+                    return true;
+                });
 
                 if (files.length === 0) {
                     container.innerHTML = `<div style="padding: 24px; color: var(--text-dim);">No guides found yet.</div>`;
