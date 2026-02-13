@@ -37,6 +37,16 @@ const CONFIG = {
     // Default Branch (main/master)
     branch: "main",
 
+    // Personal Access Token for GitHub API (optional)
+    repoToken: "",
+
+    // File extensions to index for the AI assistant
+    extensions: [".md", ".TBD", ".kiwi", ".txt", ".sh"],
+
+    // Paths/filenames to ignore (regex strings)
+    // Example: ["^_.*\\.md$"] ignores files starting with _ and ending in .md
+    ignorePaths: ["^_.*\\.md$"],
+
     // ── Ask the Kiwi (AI Chat) ──────────────────────────────────────
     // Set this to your deployed Cloudflare Worker URL to enable the chat widget.
     // Leave empty or remove to disable the widget.
