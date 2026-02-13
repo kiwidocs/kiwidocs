@@ -52,6 +52,11 @@ const CONFIG = {
     // Leave empty or remove to disable the widget.
     askKiwiEndpoint: "https://kiwiback.veerbajaj11.workers.dev",
 
+    // AI Config
+    ai_owner: "kiwidocs",
+    ai_repo: "kiwidocs",
+    ai_branch: "main",
+
     // Branding
     branding: {
         title: "Kiwi Docs", // Window title

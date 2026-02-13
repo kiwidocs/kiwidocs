@@ -41,9 +41,9 @@
 
     let history = []; // { role: 'user' | 'assistant' | 'system', text: string }
     let repoConfig = {
-        owner: CONFIG.owner,
-        repo: CONFIG.repo,
-        branch: CONFIG.branch,
+        owner: CONFIG.ai_owner,
+        repo: CONFIG.ai_repo,
+        branch: CONFIG.ai_branch,
         token: CONFIG.repoToken,
         extensions: CONFIG.extensions,
         ignorePaths: CONFIG.ignorePaths
