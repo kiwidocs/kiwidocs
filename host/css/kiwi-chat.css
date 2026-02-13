@@ -1,0 +1,428 @@
+/*
+ * Ask the Kiwi — Chat Widget Styles
+ * Matches the Kiwi Docs glass-dark aesthetic
+ */
+
+.kiwi-chat-fab {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    border: 1px solid rgba(88, 166, 255, 0.3);
+    background: linear-gradient(135deg, rgba(22, 27, 34, 0.95), rgba(13, 17, 23, 0.98));
+    backdrop-filter: blur(16px);
+    box-shadow:
+        0 4px 24px rgba(0, 0, 0, 0.5),
+        0 0 40px rgba(88, 166, 255, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 26px;
+    line-height: 1;
+}
+
+.kiwi-chat-fab:hover {
+    transform: translateY(-3px) scale(1.05);
+    border-color: rgba(88, 166, 255, 0.6);
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.6),
+        0 0 60px rgba(88, 166, 255, 0.15);
+}
+
+.kiwi-chat-fab.open {
+    transform: rotate(90deg) scale(0.9);
+    opacity: 0.7;
+}
+
+/* ── Chat Panel ───────────────────────────────────────── */
+
+.kiwi-chat-panel {
+    position: fixed;
+    bottom: 100px;
+    right: 28px;
+    width: 400px;
+    max-height: 560px;
+    background: rgba(9, 11, 15, 0.96);
+    backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    box-shadow:
+        0 24px 80px rgba(0, 0, 0, 0.7),
+        0 0 1px rgba(255, 255, 255, 0.1);
+    z-index: 9998;
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    font-family: 'Inter', -apple-system, system-ui, sans-serif;
+    animation: kiwiChatSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.kiwi-chat-panel.visible {
+    display: flex;
+}
+
+@keyframes kiwiChatSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(16px) scale(0.97);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* ── Header ───────────────────────────────────────────── */
+
+.kiwi-chat-header {
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.kiwi-chat-header-icon {
+    font-size: 24px;
+    filter: drop-shadow(0 0 6px rgba(88, 166, 255, 0.3));
+}
+
+.kiwi-chat-header-text {
+    flex: 1;
+}
+
+.kiwi-chat-header-title {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    color: #e6edf3;
+    margin: 0;
+}
+
+.kiwi-chat-header-sub {
+    font-size: 0.72rem;
+    color: #8b949e;
+    margin: 0;
+}
+
+.kiwi-chat-header-close {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    border: none;
+    background: rgba(255, 255, 255, 0.04);
+    color: #8b949e;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.kiwi-chat-header-close:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #e6edf3;
+}
+
+/* ── Messages Area ────────────────────────────────────── */
+
+.kiwi-chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-height: 280px;
+    max-height: 360px;
+    scroll-behavior: smooth;
+}
+
+.kiwi-chat-messages::-webkit-scrollbar {
+    width: 5px;
+}
+
+.kiwi-chat-messages::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+}
+
+.kiwi-chat-msg {
+    max-width: 85%;
+    padding: 10px 14px;
+    border-radius: 14px;
+    font-size: 0.88rem;
+    line-height: 1.55;
+    color: #e6edf3;
+    word-wrap: break-word;
+}
+
+.kiwi-chat-msg a {
+    color: #58a6ff;
+}
+
+.kiwi-chat-msg code {
+    background: rgba(255, 255, 255, 0.08);
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85em;
+}
+
+.kiwi-chat-msg pre {
+    background: rgba(0, 0, 0, 0.4);
+    padding: 10px 12px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-size: 0.82em;
+    margin: 6px 0;
+}
+
+.kiwi-chat-msg pre code {
+    background: none;
+    padding: 0;
+}
+
+.kiwi-chat-msg.user {
+    align-self: flex-end;
+    background: linear-gradient(135deg, rgba(88, 166, 255, 0.2), rgba(88, 166, 255, 0.1));
+    border: 1px solid rgba(88, 166, 255, 0.15);
+    border-bottom-right-radius: 4px;
+}
+
+.kiwi-chat-msg.assistant {
+    align-self: flex-start;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-bottom-left-radius: 4px;
+}
+
+.kiwi-chat-msg.system {
+    align-self: center;
+    text-align: center;
+    font-size: 0.78rem;
+    color: #8b949e;
+    background: none;
+    border: none;
+    padding: 4px 0;
+}
+
+/* ── Typing indicator ─────────────────────────────────── */
+
+.kiwi-typing {
+    display: flex;
+    gap: 5px;
+    padding: 4px 0;
+    align-items: center;
+}
+
+.kiwi-typing-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #58a6ff;
+    opacity: 0.4;
+    animation: kiwiTypingPulse 1.4s infinite;
+}
+
+.kiwi-typing-dot:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.kiwi-typing-dot:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes kiwiTypingPulse {
+
+    0%,
+    60%,
+    100% {
+        opacity: 0.2;
+        transform: scale(0.85);
+    }
+
+    30% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+}
+
+/* ── Input Area ───────────────────────────────────────── */
+
+.kiwi-chat-input-area {
+    padding: 14px 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.015);
+}
+
+.kiwi-chat-input {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 10px 14px;
+    color: #e6edf3;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.88rem;
+    outline: none;
+    transition: all 0.2s;
+    resize: none;
+    height: 40px;
+    max-height: 100px;
+    overflow-y: auto;
+}
+
+.kiwi-chat-input::placeholder {
+    color: #484f58;
+}
+
+.kiwi-chat-input:focus {
+    border-color: rgba(88, 166, 255, 0.4);
+    box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.08);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.kiwi-chat-send {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    border: none;
+    background: #58a6ff;
+    color: #0d1117;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.kiwi-chat-send:hover {
+    background: #79b8ff;
+    transform: scale(1.05);
+}
+
+.kiwi-chat-send:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.kiwi-chat-send svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* ── Suggested Questions ──────────────────────────────── */
+
+.kiwi-chat-suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 0 20px 12px;
+}
+
+.kiwi-chat-suggestion {
+    font-size: 0.75rem;
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.03);
+    color: #8b949e;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.kiwi-chat-suggestion:hover {
+    border-color: rgba(88, 166, 255, 0.3);
+    color: #58a6ff;
+    background: rgba(88, 166, 255, 0.06);
+}
+
+/* ── Authentication UI ─────────────────────────────────── */
+
+.kiwi-chat-auth-prompt {
+    padding: 12px;
+    background: rgba(88, 166, 255, 0.05);
+    border: 1px solid rgba(88, 166, 255, 0.1);
+    border-radius: 12px;
+    margin: 10px 0;
+    text-align: center;
+}
+
+.kiwi-chat-auth-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #e6edf3;
+    margin-bottom: 8px;
+}
+
+.kiwi-chat-auth-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.kiwi-chat-auth-btn {
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: none;
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s;
+}
+
+.kiwi-chat-auth-btn.github {
+    background: #24292f;
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.kiwi-chat-auth-btn.github:hover {
+    background: #30363d;
+}
+
+.kiwi-chat-auth-btn.anon {
+    background: rgba(255, 255, 255, 0.08);
+    color: #e6edf3;
+}
+
+.kiwi-chat-auth-btn.anon:hover {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.kiwi-chat-auth-btn svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+}
+
+/* ── Responsive ───────────────────────────────────────── */
+
+@media (max-width: 480px) {
+    .kiwi-chat-panel {
+        width: calc(100vw - 24px);
+        right: 12px;
+        bottom: 88px;
+        max-height: 70vh;
+    }
+}

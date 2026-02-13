@@ -14,6 +14,16 @@
         You should have received a copy of the GNU General Public License
         along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+
+// Polyfill crypto.randomUUID for non-secure contexts (e.g., HTTP on [::] or IP)
+if (typeof crypto !== 'undefined' && !crypto.randomUUID) {
+    crypto.randomUUID = function () {
+        return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, c =>
+            (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+        );
+    };
+}
+
 const CONFIG = {
     // Your GitHub Organization or Username
     owner: "kiwidocs",
@@ -26,6 +36,11 @@ const CONFIG = {
 
     // Default Branch (main/master)
     branch: "main",
+
+    // ── Ask the Kiwi (AI Chat) ──────────────────────────────────────
+    // Set this to your deployed Cloudflare Worker URL to enable the chat widget.
+    // Leave empty or remove to disable the widget.
+    askKiwiEndpoint: "https://kiwiback.veerbajaj11.workers.dev",
 
     // Branding
     branding: {
@@ -40,7 +55,18 @@ const CONFIG = {
     footer: {
         creator: "Veer Bajaj",
         organization: "Kiwi Docs", // If none use Kiwi Docs
-        version: "Kiwi Docs v2.1.0"
+        version: "Kiwi Docs v2.2.0"
+    },
+
+    // Firebase Configuration
+    firebaseConfig: {
+        apiKey: "AIzaSyA389bfG_hGa5l2ckz9Ak3al_amtxvU53c",
+        authDomain: "vibroim-b5dc3.firebaseapp.com",
+        projectId: "vibroim-b5dc3",
+        storageBucket: "vibroim-b5dc3.firebasestorage.app",
+        messagingSenderId: "733742930053",
+        appId: "1:733742930053:web:90437a2f6ac8b9cf1231ec",
+        measurementId: "G-EEW2LL3PJR"
     }
 };
 

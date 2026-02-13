@@ -1,0 +1,19 @@
+name = "kiwiback"
+main = "src/index.ts"
+compatibility_date = "2026-02-12"
+
+
+[[kv_namespaces]]
+binding = "DOCS_CACHE"
+id = "a74e50eac1ed40efb4ca6881ea1057ca"
+
+[vars]
+# Firebase Configuration
+FIREBASE_PROJECT_ID = "vibroim-b5dc3"
+
+# Comma-separated allowed origins for CORS (use "*" for any)
+ALLOWED_ORIGINS = "*"
+
+# Secrets (set via CLI, never commit):
+#   wrangler secret put GEMINI_API_KEY
+#   wrangler secret put GITHUB_TOKEN    # only for private repos
