@@ -81,7 +81,7 @@ Kiwi now uses a simplified, file-per-block system in the `blocks/` directory. Ea
 ### 1. The Block Structure
 A `.kiwi` file consists of two parts: a YAML-like header and the HTML template.
 
-```markdown
+<!-- ```markdown
 ---
 name: Alert
 trigger: @alert
@@ -91,7 +91,9 @@ isMultiLine: true
   <h3>{title|Important}</h3>
   <p>{body}</p>
 </div>
-```
+``` -->
+
+![image showing alert block](assets/images/building-2.png)
 
 - **`trigger`**: The @command used in Markdown.
 - **`isMultiLine`**: Set to `true` if the block should capture code/text below it.
@@ -101,7 +103,7 @@ isMultiLine: true
 ### 2. Logic-Powered Blocks
 If you need complex logic (like our tabbed snippets), you can use a `<script>` tag inside the `.kiwi` file. The script should return a renderer function:
 
-```html
+<!-- ```html
 ---
 trigger: @my-logic
 isMultiLine: true
@@ -112,8 +114,8 @@ isMultiLine: true
   return `<div>Processed ${body}</div>`;
 }
 </script>
-```
-
+``` -->
+![image showing alert block](assets/images/building-1.png)
 ### ⚙️ The Engine: `blocklib.js`
 The heavy lifting is now handled by `host/blocklib.js`. It automatically:
 1. Fetches all `.kiwi` files from your repository.

@@ -1,7 +1,7 @@
-# Kiwi Docs Template
+# Kiwi Docs
 
 A lightweight, GitHub-powered documentation site that runs directly on **GitHub Pages**.
-Fork this repository to create your own documentation portal in minutes.
+Fork this repository to create your own documentation portal in **minutes**.
 
 ---
 
@@ -12,6 +12,7 @@ Fork this repository to create your own documentation portal in minutes.
 * **Easy Customization** – Configure via `host/config.js` and `css/theme.css`
 * **Responsive Design** – Mobile-friendly layout
 * **Activity Feed** – Displays recent commits from selected repositories
+* **AI Assistant** – Ask questions about the docs and get answers from a LLM
 
 ---
 
@@ -21,8 +22,9 @@ Fork this repository to create your own documentation portal in minutes.
 
 You have three options:
 
-<!-- @snippets-per-type(CLI="gh repo fork kiwidocs/kiwidocs --clone" GUI="Use GitHub's web UI or CLI:" Installer="curl -fsSL -o install.sh https://raw.githubusercontent.com/kiwidocs/kiwidocs/main/install.sh && bash install.sh") -->
+<!-- @snippets-per-type(Installer="curl -fsSL -o install.sh https://raw.githubusercontent.com/kiwidocs/kiwidocs/main/install.sh && bash install.sh" CLI="gh repo fork kiwidocs/kiwidocs --clone" GUI="Use GitHub's web UI") -->
 
+![image showing installation](assets/images/install.png)
 
 > **Requirements:** `git`, `node`, and `bash`
 > On macOS: `brew install node git`
